@@ -199,7 +199,7 @@
         </a>
 
         <div class="product-card" onclick="openConfigModal('digital')">
-            <div class="product-title">Calificador Digital</div>
+            <div class="product-title">Calificador y Asistencia Digital</div>
             <div class="product-desc">Versión Excel o App Móvil (Sin cuaderno físico).</div>
             <span class="price-tag">Personalizar ➔</span>
         </div>
@@ -605,7 +605,7 @@
                     }
                 }
             });
-            let title = currentProductType === 'profesores' ? 'Calificador Profesores' : currentProductType === 'maestros' ? 'Calificador Maestrxs' : 'Calificador Digital';
+            let title = currentProductType === 'profesores' ? 'Calificador Profesores' : currentProductType === 'maestros' ? 'Calificador Maestrxs' : 'Calificador y Asistencia Digital';
             cart.push({ title, details, total });
             closeConfigModal();
             updateCartBar();
