@@ -119,6 +119,10 @@
         .cover-option.selected .cover-check { display: flex; }
         .cover-selected-summary { display: none; margin-top: 12px; padding: 11px 13px; border-radius: 12px; background: #eef6fc; color: var(--primary-blue); font-weight: 700; font-size: 0.92rem; }
         .cover-selected-summary.show { display: block; }
+        .progressive-section { display: none; }
+        .progressive-section.show { display: block; animation: fadeIn 0.3s ease; }
+        .section-helper { margin: -3px 0 12px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.35; }
+        .empty-options-note { padding: 14px; border-radius: 12px; background: #f2f2f7; color: var(--text-secondary); font-size: 0.92rem; line-height: 1.4; }
         @media (min-width: 520px) { .cover-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
         /* CHECKBOXES */
@@ -205,15 +209,10 @@
     <div class="container">
         <div class="product-card" onclick="openConfigModal('profesores')">
             <div class="product-title">Calificador Impreso para Profesores</div>
-            <div class="product-desc">Gestioná múltiples cursos y personalizá la portada, librería y adicionales.</div>
+            <div class="product-desc">Gestioná múltiples cursos, elegí tu portada y sumá agregados para tu agenda.</div>
             <span class="price-tag">Personalizar ➔</span>
         </div>
 
-        <div class="product-card" onclick="openConfigModal('maestros')">
-            <div class="product-title">Calificador Impreso para Maestrxs</div>
-            <div class="product-desc">Gestioná múltiples grados y personalizá la portada, librería y adicionales.</div>
-            <span class="price-tag">Personalizar ➔</span>
-        </div>
         <a href="https://docentesbrown-oficial.github.io/Talleres/" target="_blank" class="card-link">
             <div class="product-card" style="background-color: #eef6fc; border: 1px solid #dcebf7;">
                 <div class="product-title">Talleres y Capacitaciones</div>
@@ -371,7 +370,7 @@
 
         // Pegá aquí la URL del Web App de Google Apps Script que lista las tapas.
         // Mientras siga el texto de ejemplo, la tienda mostrará los temas sin imagen como respaldo.
-        const COVERS_API_URL = "https://script.google.com/macros/s/AKfycbzjZS1BWh0XBanQGWgGD4EJGbI4MqQwBbeUV60F68p7-2VNd2558gzCec-Vxgwd5saq/exec";
+        const COVERS_API_URL = "PEGAR_AQUI_LA_URL_DEL_WEB_APP";
 
 
         // LISTA DE TEMAS (Checklist)
@@ -383,7 +382,7 @@
             "Paisajes", "Papa Francisco", "Química", "Retro"
         ].sort();
 
-        let CATALOG = { profesores: [], maestros: [], temas: [], digital: [], libreria: [], adicionales: [], cupones: [] };
+        let CATALOG = { profesores: [], agregados: [], cupones: [] };
         let cart = [];
         let currentProductType = '';
         let appliedDiscount = { code: '', percent: 0 };
@@ -413,12 +412,11 @@
             const rows = csv.split('\n').slice(1);
             rows.forEach(row => {
                 const cols = row.split(',').map(c => c.trim());
+                // Columnas A y B: cantidad de cursos y precio del calificador.
                 if(cols[0]) CATALOG.profesores.push({ name: cols[0], price: parseInt(cols[1]) || 0 });
-                if(cols[2]) CATALOG.maestros.push({ name: cols[2], price: parseInt(cols[3]) || 0 });
-                if(cols[4]) CATALOG.temas.push({ name: cols[4], price: 0 });
-                if(cols[6]) CATALOG.digital.push({ name: cols[6], price: parseInt(cols[7]) || 0 });
-                if(cols[8]) CATALOG.libreria.push({ name: cols[8], price: parseInt(cols[9]) || 0 });
-                if(cols[10]) CATALOG.adicionales.push({ name: cols[10], price: parseInt(cols[11]) || 0 });
+
+                // Columnas E y F: agregados para la agenda y sus precios.
+                if(cols[4]) CATALOG.agregados.push({ name: cols[4], price: parseInt(cols[5]) || 0 });
                 
                 if(cols[12] && cols[13]) {
                     const code = cols[12].trim().toUpperCase();
@@ -432,9 +430,7 @@
 
 
         function buildFallbackCoverCatalog() {
-            const names = CATALOG.temas.length > 0
-                ? CATALOG.temas.map(item => item.name)
-                : COVER_THEMES;
+            const names = COVER_THEMES;
             return [...new Set(names.filter(Boolean))]
                 .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))
                 .map((name, index) => ({ id: `fallback-${index}`, name, image: '' }));
@@ -536,7 +532,29 @@
                 summary.classList.add('show');
             }
 
+            const addonsSection = document.getElementById('agenda-addons-section');
+            const wasHidden = addonsSection && !addonsSection.classList.contains('show');
+            if (addonsSection) addonsSection.classList.add('show');
+
             updateTotal();
+
+            if (wasHidden) {
+                setTimeout(() => addonsSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+            }
+        }
+
+        function handleCourseSelection() {
+            const baseSelect = document.getElementById('input-base');
+            const coverSection = document.getElementById('cover-section');
+            const shouldShow = Boolean(baseSelect && baseSelect.value);
+            const wasHidden = coverSection && !coverSection.classList.contains('show');
+
+            if (coverSection) coverSection.classList.toggle('show', shouldShow);
+            updateTotal();
+
+            if (shouldShow && wasHidden) {
+                setTimeout(() => coverSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+            }
         }
 
         function openAdminLogin() { document.getElementById('admin-login-modal').classList.add('active'); }
@@ -568,8 +586,8 @@
         function closeAdminDashboard() { document.getElementById('admin-dashboard-modal').classList.remove('active'); }
 
         function openConfigModal(type) {
-            currentProductType = type;
-            renderConfigForm(type);
+            currentProductType = 'profesores';
+            renderConfigForm('profesores');
             updateTotal(); 
             document.getElementById('config-modal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -591,49 +609,50 @@
         function renderConfigForm(type) {
             const container = document.getElementById('dynamic-fields');
             container.innerHTML = '';
-            document.getElementById('modal-title').innerText = type === 'profesores' ? 'Calificador para Profesores' : 'Calificador para Maestrxs';
-            let html = '';
+            document.getElementById('modal-title').innerText = 'Calificador para Profesores';
 
-            if (type === 'profesores') html += createSelect("1. Cantidad de Cursos", "base", CATALOG.profesores);
-            else if (type === 'maestros') html += createSelect("1. Cantidad de Grados", "base", CATALOG.maestros);
+            let html = createSelect("1. Cantidad de Cursos", "base", CATALOG.profesores, "Seleccioná la cantidad de cursos...", "handleCourseSelection()");
 
-            {
-                // GALERÍA VISUAL DE TAPAS
-                html += `<div class="form-group">
-                            <div class="section-title">2. Elegí el tema de la portada <span style="color:var(--danger-red)">*</span></div>
-                            <div class="cover-helper">Tocá una tapa para verla seleccionada.</div>
-                            <div id="cover-gallery-status" class="cover-gallery-status"></div>
-                            <div id="cover-gallery" class="cover-grid"></div>
-                            <div id="cover-selected-summary" class="cover-selected-summary"></div>
-                            <input type="hidden" id="input-tema" value="">
-                         </div>`;
+            html += `<div class="form-group progressive-section" id="cover-section">
+                        <div class="section-title">2. Elegí el tema de la portada <span style="color:var(--danger-red)">*</span></div>
+                        <div class="cover-helper">Tocá una tapa para verla seleccionada.</div>
+                        <div id="cover-gallery-status" class="cover-gallery-status"></div>
+                        <div id="cover-gallery" class="cover-grid"></div>
+                        <div id="cover-selected-summary" class="cover-selected-summary"></div>
+                        <input type="hidden" id="input-tema" value="">
+                     </div>`;
 
-                const noneOption = { name: "Ninguno", price: 0 };
-                let libItems = [noneOption, ...CATALOG.libreria];
-                if(CATALOG.libreria.length > 0) html += createCheckboxSection("3. Opcionales de Librería", "lib", libItems);
-                let addItems = [noneOption, ...CATALOG.adicionales];
-                if(CATALOG.adicionales.length > 0) html += createCheckboxSection("4. Adicionales", "add", addItems);
-            }
+            const noneOption = { name: "No agregar", price: 0 };
+            const addonItems = [noneOption, ...CATALOG.agregados];
+            html += `<div class="form-group progressive-section" id="agenda-addons-section">
+                        <div class="section-title">3. Agregados para tu agenda: <span style="color:var(--danger-red)">*</span></div>
+                        <div class="section-helper">Podés elegir uno o varios. Si no querés sumar nada, seleccioná “No agregar”.</div>
+                        ${CATALOG.agregados.length > 0
+                            ? createCheckboxListMarkup("agenda", addonItems)
+                            : '<div class="empty-options-note">No hay agregados disponibles en este momento.</div>'}
+                     </div>`;
+
             container.innerHTML = html;
             renderCoverGallery();
         }
 
-        function createSelect(label, id, items, defaultText = "Seleccionar opción...") {
+        function createSelect(label, id, items, defaultText = "Seleccionar opción...", onChange = "updateTotal()") {
             let optionsHtml = `<option value="" data-price="0" selected disabled>${defaultText}</option>`;
-            optionsHtml += items.map(item => `<option value="${item.name}" data-price="${item.price}">${item.name} ${item.price > 0 ? '(+$'+item.price+')' : ''}</option>`).join('');
-            return `<div class="form-group"><div class="section-title">${label} <span style="color:var(--danger-red)">*</span></div><div class="select-wrapper"><select id="input-${id}" onchange="updateTotal()">${optionsHtml}</select></div></div>`;
+            optionsHtml += items.map(item => `<option value="${escapeHtml(item.name)}" data-price="${item.price}">${escapeHtml(item.name)} ${item.price > 0 ? '(+$'+item.price+')' : ''}</option>`).join('');
+            return `<div class="form-group"><div class="section-title">${label} <span style="color:var(--danger-red)">*</span></div><div class="select-wrapper"><select id="input-${id}" onchange="${onChange}">${optionsHtml}</select></div></div>`;
         }
-        function createCheckboxSection(label, group, items) {
+
+        function createCheckboxListMarkup(group, items) {
             let boxes = items.map((item, i) => {
                 const isHojas = item.name.toLowerCase().includes('hojas');
-                const isNinguno = item.name === "Ninguno";
+                const isNinguno = item.name === "No agregar";
                 let onClickLogic = isNinguno ? `handleNinguno('${group}', this)` : `handleRegularItem('${group}', this)`;
                 if(isHojas) onClickLogic += `; toggleQty('${group}-${i}')`;
                 onClickLogic += `; updateTotal()`;
                 const qtyHtml = isHojas ? `<div class="qty-input-wrapper" id="qty-wrapper-${group}-${i}"><label>¿Cuántas hojas?</label><input type="number" class="qty-input" id="qty-${group}-${i}" value="10" min="1" oninput="updateTotal()"></div>` : '';
-                return `<div class="checkbox-item-wrapper"><div class="checkbox-item" onclick="document.getElementById('${group}-${i}').click()"><input type="checkbox" id="${group}-${i}" data-price="${item.price}" data-name="${item.name}" onclick="event.stopPropagation(); ${onClickLogic}"><label for="${group}-${i}">${item.name}</label><span class="checkbox-price">${item.price > 0 ? '+$'+item.price : ''}</span></div>${qtyHtml}</div>`;
+                return `<div class="checkbox-item-wrapper"><div class="checkbox-item" onclick="document.getElementById('${group}-${i}').click()"><input type="checkbox" id="${group}-${i}" data-price="${item.price}" data-name="${escapeHtml(item.name)}" onclick="event.stopPropagation(); ${onClickLogic}"><label for="${group}-${i}">${escapeHtml(item.name)}</label><span class="checkbox-price">${item.price > 0 ? '+$'+item.price : ''}</span></div>${qtyHtml}</div>`;
             }).join('');
-            return `<div class="form-group" id="group-${group}"><div class="section-title">${label} <span style="color:var(--danger-red)">*</span></div><div class="checkbox-list">${boxes}</div></div>`;
+            return `<div class="checkbox-list" id="group-${group}">${boxes}</div>`;
         }
 
         function handleNinguno(group, checkbox) {
@@ -650,7 +669,7 @@
         function handleRegularItem(group, checkbox) {
             if(checkbox.checked) {
                 const ningunoBox = document.getElementById(`${group}-0`);
-                if(ningunoBox && ningunoBox.dataset.name === "Ninguno") ningunoBox.checked = false;
+                if(ningunoBox && (ningunoBox.dataset.name === "Ninguno" || ningunoBox.dataset.name === "No agregar")) ningunoBox.checked = false;
             }
         }
         function toggleQty(id) {
@@ -663,17 +682,17 @@
             let total = 0;
             let errors = [];
             
-            // Validar selects
-            document.querySelectorAll('select').forEach(sel => {
-                total += parseInt(sel.options[sel.selectedIndex]?.dataset.price || 0);
-                if (sel.value === "") errors.push("Falta seleccionar opción");
-            });
+            // Validar cantidad de cursos.
+            const baseSelect = document.getElementById('input-base');
+            if (baseSelect) {
+                total += parseInt(baseSelect.options[baseSelect.selectedIndex]?.dataset.price || 0);
+                if (!baseSelect.value) errors.push("Elegí la cantidad de cursos");
+            }
 
             const temaInput = document.getElementById('input-tema');
-            if (temaInput && !temaInput.value) errors.push("Elegí una tapa");
+            if (baseSelect && baseSelect.value && temaInput && !temaInput.value) errors.push("Elegí una tapa");
 
-            if(document.getElementById('group-lib') && document.querySelectorAll('#group-lib input:checked').length === 0) errors.push("Elige librería");
-            if(document.getElementById('group-add') && document.querySelectorAll('#group-add input:checked').length === 0) errors.push("Elige adicionales");
+            if(document.getElementById('group-agenda') && document.querySelectorAll('#group-agenda input:checked').length === 0) errors.push("Elegí los agregados o marcá No agregar");
 
             document.querySelectorAll('input[type="checkbox"]:checked').forEach(chk => {
                 let itemPrice = parseInt(chk.dataset.price);
@@ -721,7 +740,7 @@
             // Grabar Checkboxes
             document.querySelectorAll('input[type="checkbox"]:checked').forEach(chk => {
                 const name = chk.dataset.name;
-                if(name !== "Ninguno") {
+                if(name !== "Ninguno" && name !== "No agregar") {
                     let price = parseInt(chk.dataset.price);
                     const qtyInput = document.getElementById(`qty-${chk.id}`);
                     if (qtyInput) {
@@ -735,7 +754,7 @@
                     }
                 }
             });
-            let title = currentProductType === 'profesores' ? 'Calificador Impreso para Profesores' : 'Calificador Impreso para Maestrxs';
+            let title = 'Calificador Impreso para Profesores';
             cart.push({ title, details, total });
             closeConfigModal();
             updateCartBar();
