@@ -183,15 +183,15 @@
     </header>
 
     <div class="container">
-        <div class="product-card" style="cursor: default; opacity: 0.72;">
-            <div class="product-title">Calificadores Impresos</div>
-            <div class="product-desc">Gestiona múltiples cursos. Personalización completa.</div>
-            <span class="price-tag" style="background:#e5e5ea; color:#8e8e93;">AGOTADO</span>
+        <div class="product-card" onclick="openConfigModal('profesores')">
+            <div class="product-title">Calificador Impreso para Profesores</div>
+            <div class="product-desc">Gestioná múltiples cursos y personalizá la portada, librería y adicionales.</div>
+            <span class="price-tag">Personalizar ➔</span>
         </div>
 
-        <div class="product-card" onclick="openConfigModal('digital')">
-            <div class="product-title">Calificador y Asistencia Digital</div>
-            <div class="product-desc">Versión Excel o App Móvil (Sin cuaderno físico).</div>
+        <div class="product-card" onclick="openConfigModal('maestros')">
+            <div class="product-title">Calificador Impreso para Maestrxs</div>
+            <div class="product-desc">Gestioná múltiples grados y personalizá la portada, librería y adicionales.</div>
             <span class="price-tag">Personalizar ➔</span>
         </div>
         <a href="https://docentesbrown-oficial.github.io/Talleres/" target="_blank" class="card-link">
@@ -448,14 +448,13 @@
         function renderConfigForm(type) {
             const container = document.getElementById('dynamic-fields');
             container.innerHTML = '';
-            document.getElementById('modal-title').innerText = type === 'profesores' ? 'Profesores' : type === 'maestros' ? 'Maestrxs' : 'Digital';
+            document.getElementById('modal-title').innerText = type === 'profesores' ? 'Calificador para Profesores' : 'Calificador para Maestrxs';
             let html = '';
 
             if (type === 'profesores') html += createSelect("1. Cantidad de Cursos", "base", CATALOG.profesores);
             else if (type === 'maestros') html += createSelect("1. Cantidad de Grados", "base", CATALOG.maestros);
-            else if (type === 'digital') html += createSelect("1. Formato Digital", "base", CATALOG.digital);
 
-            if (type !== 'digital') {
+            {
                 // SECCION DE TEMA (MODIFICADA: Ahora es un Select)
                 let themesOptions = COVER_THEMES.map(t => `<option value="${t}" data-price="0">${t}</option>`).join('');
                 
@@ -469,21 +468,17 @@
                             </div>
                          </div>`;
 
-                let digitalOpts = [{name: "No agregar versión digital", price: 0}, ...CATALOG.digital];
-                html += createSelect("3. ¿Sumar Versión Digital?", "digital_addon", digitalOpts, "No agregar versión digital");
-
                 const noneOption = { name: "Ninguno", price: 0 };
                 let libItems = [noneOption, ...CATALOG.libreria];
-                if(CATALOG.libreria.length > 0) html += createCheckboxSection("4. Opcionales de Librería", "lib", libItems);
+                if(CATALOG.libreria.length > 0) html += createCheckboxSection("3. Opcionales de Librería", "lib", libItems);
                 let addItems = [noneOption, ...CATALOG.adicionales];
-                if(CATALOG.adicionales.length > 0) html += createCheckboxSection("5. Adicionales", "add", addItems);
+                if(CATALOG.adicionales.length > 0) html += createCheckboxSection("4. Adicionales", "add", addItems);
             }
             container.innerHTML = html;
         }
 
         function createSelect(label, id, items, defaultText = "Seleccionar opción...") {
             let optionsHtml = `<option value="" data-price="0" selected disabled>${defaultText}</option>`;
-            if(id === 'digital_addon') optionsHtml = ''; 
             optionsHtml += items.map(item => `<option value="${item.name}" data-price="${item.price}">${item.name} ${item.price > 0 ? '(+$'+item.price+')' : ''}</option>`).join('');
             return `<div class="form-group"><div class="section-title">${label} <span style="color:var(--danger-red)">*</span></div><div class="select-wrapper"><select id="input-${id}" onchange="updateTotal()">${optionsHtml}</select></div></div>`;
         }
@@ -567,7 +562,7 @@
 
                 const name = sel.value;
                 const price = parseInt(sel.options[sel.selectedIndex].dataset.price);
-                if(name && name !== "No agregar versión digital") {
+                if(name) {
                     details.push(`${name} ($${price})`);
                     total += price;
                 }
@@ -596,7 +591,7 @@
                     }
                 }
             });
-            let title = currentProductType === 'profesores' ? 'Calificador Profesores' : currentProductType === 'maestros' ? 'Calificador Maestrxs' : 'Calificador y Asistencia Digital';
+            let title = currentProductType === 'profesores' ? 'Calificador Impreso para Profesores' : 'Calificador Impreso para Maestrxs';
             cart.push({ title, details, total });
             closeConfigModal();
             updateCartBar();
