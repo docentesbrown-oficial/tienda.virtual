@@ -148,7 +148,11 @@
         .shirt-gallery-status.error { background: rgba(179,92,68,0.25); color: #fff; }
         .shirt-gallery-status:empty { display: none; }
         .shirt-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-        .shirt-card { overflow: hidden; border-radius: 12px; background: #fff; color: #1a1a1b; }
+        .shirt-card { position: relative; width: 100%; padding: 0; overflow: hidden; border: 2px solid transparent; border-radius: 12px; background: #fff; color: #1a1a1b; cursor: pointer; font-family: var(--font-main); transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease; }
+        .shirt-card:active { transform: scale(0.98); }
+        .shirt-card.selected { border-color: #fff; box-shadow: 0 0 0 3px rgba(179,92,68,0.9); }
+        .shirt-check { position: absolute; top: 8px; right: 8px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; background: #b35c44; color: #fff; display: none; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; box-shadow: 0 3px 10px rgba(0,0,0,0.25); }
+        .shirt-card.selected .shirt-check { display: flex; }
         .shirt-image-wrap { width: 100%; aspect-ratio: 4 / 5; overflow: hidden; background: #f3f3f3; }
         .shirt-image { width: 100%; height: 100%; object-fit: contain; display: block; }
         .shirt-label { display: block; padding: 9px 8px 10px; text-align: center; font-size: 0.79rem; font-weight: 800; line-height: 1.2; }
@@ -396,8 +400,8 @@
         // para leer la carpeta de tapas.
         const COVERS_API_URL = "https://script.google.com/macros/s/AKfycbzjZS1BWh0XBanQGWgGD4EJGbI4MqQwBbeUV60F68p7-2VNd2558gzCec-Vxgwd5saq/exec";
 
-        // REMERAS SIN RECREO: la carpeta se usa solo como vidriera visual.
-        // El cliente únicamente elige SÍ o NO; modelo, talle y color se coordinan por WhatsApp.
+        // REMERAS SIN RECREO: los modelos se obtienen desde la carpeta de Drive.
+        // El cliente elige el modelo en la app; talle y color se coordinan luego por WhatsApp.
         const SHIRT_FOLDER_ID = "1mjLOqhA80otwFtAXS3HOeMHwOSYE0fn5";
         const SHIRTS_API_URL = `${COVERS_API_URL}?type=shirts`;
         const SHIRT_PROMO_PRICE = 20000;
@@ -411,6 +415,8 @@
         let selectedCoverId = '';
         let shirtCatalog = [];
         let shirtCatalogError = '';
+        let selectedShirtId = '';
+        let selectedShirtName = '';
 
         const REQUEST_TIMEOUT_MS = 10000;
         const PAGE_LOADER_MAX_MS = 2500;
@@ -611,7 +617,7 @@
             } catch (error) {
                 console.error('Error al cargar remeras desde Drive:', error);
                 shirtCatalog = [];
-                shirtCatalogError = 'Los modelos no pudieron cargarse dentro de la página. La opción de sumar la remera sigue disponible.';
+                shirtCatalogError = 'Los modelos no pudieron cargarse desde Google Drive. No se puede seleccionar una remera hasta que vuelvan a estar disponibles.';
             }
         }
 
@@ -694,27 +700,50 @@
             const status = document.getElementById('shirt-gallery-status');
             if (!gallery || !status) return;
 
+            selectedShirtId = '';
+            selectedShirtName = '';
             status.textContent = shirtCatalogError;
             status.classList.toggle('error', Boolean(shirtCatalogError));
 
             if (shirtCatalog.length === 0) {
                 gallery.innerHTML = '';
-                if (!status.textContent) status.textContent = 'No hay modelos disponibles para mostrar por el momento.';
+                if (!status.textContent) status.textContent = 'No hay modelos disponibles para seleccionar por el momento.';
                 status.classList.add('error');
                 return;
             }
 
             gallery.innerHTML = shirtCatalog.map(shirt => {
+                const safeId = escapeHtml(shirt.id);
                 const safeName = escapeHtml(shirt.name);
                 const visual = shirt.image
                     ? `<img class="shirt-image" src="${escapeHtml(shirt.image)}" alt="Remera ${safeName}" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<div class=&quot;cover-placeholder&quot;>Vista previa no disponible</div>'">`
                     : `<div class="cover-placeholder">${safeName}</div>`;
 
-                return `<div class="shirt-card">
+                return `<button type="button" class="shirt-card" data-shirt-id="${safeId}" data-shirt-name="${safeName}" onclick="selectShirt(this)">
+                            <span class="shirt-check">✓</span>
                             <div class="shirt-image-wrap">${visual}</div>
                             <span class="shirt-label">${safeName}</span>
-                        </div>`;
+                        </button>`;
             }).join('');
+        }
+
+        function selectShirt(button) {
+            document.querySelectorAll('.shirt-card').forEach(option => option.classList.remove('selected'));
+            button.classList.add('selected');
+
+            selectedShirtId = button.dataset.shirtId || '';
+            selectedShirtName = button.dataset.shirtName || '';
+
+            const yesRadio = document.querySelector('input[name="shirtPromo"][value="yes"]');
+            if (yesRadio) yesRadio.checked = true;
+
+            const summary = document.getElementById('shirt-choice-summary');
+            if (summary) {
+                summary.textContent = `Remera elegida: ${selectedShirtName}. Talle y color se coordinan por WhatsApp.`;
+                summary.classList.add('show');
+            }
+
+            updateTotal();
         }
 
         function handleAgendaSelectionProgress() {
@@ -733,10 +762,21 @@
         function handleShirtChoice() {
             const selected = document.querySelector('input[name="shirtPromo"]:checked');
             const summary = document.getElementById('shirt-choice-summary');
+
+            if (selected?.value === 'no') {
+                selectedShirtId = '';
+                selectedShirtName = '';
+                document.querySelectorAll('.shirt-card').forEach(option => option.classList.remove('selected'));
+            }
+
             if (summary && selected) {
-                summary.textContent = selected.value === 'yes'
-                    ? 'Remera agregada. El modelo, talle y color se coordinan luego por WhatsApp.'
-                    : 'No se agregará una remera al pedido.';
+                if (selected.value === 'yes') {
+                    summary.textContent = selectedShirtName
+                        ? `Remera elegida: ${selectedShirtName}. Talle y color se coordinan por WhatsApp.`
+                        : 'Elegí un modelo de la galería.';
+                } else {
+                    summary.textContent = 'No se agregará una remera al pedido.';
+                }
                 summary.classList.add('show');
             }
             updateTotal();
@@ -841,7 +881,7 @@
                             <span class="shirt-promo-kicker">Promo exclusiva</span>
                             <div class="shirt-promo-title">Sumá una remera SIN RECREO</div>
                             <div class="shirt-promo-price">$${SHIRT_PROMO_PRICE.toLocaleString('es-AR')}</div>
-                            <p class="shirt-promo-copy">La app solo registra si querés sumarla. El modelo, el talle y el color se coordinan después por WhatsApp. La remera no participa de descuentos porcentuales.</p>
+                            <p class="shirt-promo-copy">Elegí el modelo desde la galería. El talle y el color se coordinan después por WhatsApp. La remera no participa de descuentos porcentuales.</p>
 
                             <div class="shirt-choice-list">
                                 <label class="shirt-choice">
@@ -855,7 +895,7 @@
                                     <input type="radio" name="shirtPromo" value="yes" onchange="handleShirtChoice()">
                                     <span class="shirt-choice-text">
                                         <span class="shirt-choice-title">Sí, sumar una remera por $${SHIRT_PROMO_PRICE.toLocaleString('es-AR')}</span>
-                                        <span class="shirt-choice-desc">Definimos modelo, talle y color al confirmar por WhatsApp.</span>
+                                        <span class="shirt-choice-desc">Elegí el modelo abajo; talle y color se coordinan por WhatsApp.</span>
                                     </span>
                                 </label>
                             </div>
@@ -863,7 +903,7 @@
 
                             <div class="shirt-models-box">
                                 <p class="shirt-models-title">Modelos disponibles</p>
-                                <p class="shirt-models-helper">Son solo una referencia visual: no tenés que elegir un modelo en esta pantalla.</p>
+                                <p class="shirt-models-helper">Tocá una remera para elegir el modelo. El talle y el color se coordinan luego por WhatsApp.</p>
                                 <div id="shirt-gallery-status" class="shirt-gallery-status"></div>
                                 <div id="shirt-gallery" class="shirt-grid"></div>
                             </div>
@@ -943,6 +983,7 @@
 
             const shirtChoice = document.querySelector('input[name="shirtPromo"]:checked');
             if (hasAgendaChoice && !shirtChoice) errors.push('Elegí si querés sumar la remera');
+            if (shirtChoice?.value === 'yes' && !selectedShirtName) errors.push('Elegí un modelo de remera');
             if (shirtChoice?.value === 'yes') total += SHIRT_PROMO_PRICE;
 
             document.getElementById('modal-price').innerText = `$${total.toLocaleString('es-AR')}`;
@@ -965,7 +1006,7 @@
             const shirtChoice = document.querySelector('input[name="shirtPromo"]:checked');
             const agendaChecked = document.querySelectorAll('#group-agenda input:checked');
 
-            if (!baseSelect?.value || !temaInput?.value || agendaChecked.length === 0 || !shirtChoice) {
+            if (!baseSelect?.value || !temaInput?.value || agendaChecked.length === 0 || !shirtChoice || (shirtChoice.value === 'yes' && !selectedShirtName)) {
                 updateTotal();
                 return;
             }
@@ -999,7 +1040,8 @@
             if (shirtChoice.value === 'yes') {
                 nonDiscountableTotal = SHIRT_PROMO_PRICE;
                 details.push(`Promo remera SIN RECREO ($${SHIRT_PROMO_PRICE.toLocaleString('es-AR')})`);
-                details.push('Modelo, talle y color: a coordinar por WhatsApp');
+                details.push(`Modelo: ${selectedShirtName}`);
+                details.push('Talle y color: a coordinar por WhatsApp');
                 details.push('La remera no participa de descuentos porcentuales');
             } else {
                 details.push('Remera SIN RECREO: No agregar');
@@ -1012,7 +1054,8 @@
                 total,
                 discountableTotal,
                 nonDiscountableTotal,
-                includesShirtPromo: shirtChoice.value === 'yes'
+                includesShirtPromo: shirtChoice.value === 'yes',
+                shirtModel: shirtChoice.value === 'yes' ? selectedShirtName : ''
             });
 
             closeConfigModal();
@@ -1220,7 +1263,10 @@
             }
 
             if (hasShirtPromo) {
-                text += '\n\n*REMERA SIN RECREO:* modelo, talle y color a coordinar por este medio.';
+                const shirtModels = cart.filter(item => item.includesShirtPromo && item.shirtModel).map(item => item.shirtModel);
+                if (shirtModels.length > 0) {
+                    text += `\n\n*REMERA SIN RECREO:* modelo elegido: ${shirtModels.join(', ')}. Talle y color a coordinar por este medio.`;
+                }
             }
 
             text += '\n\nQuedo a la espera para coordinar el pago. Gracias!';
