@@ -212,16 +212,7 @@
             <div class="product-desc">Gestioná múltiples cursos, elegí tu portada y sumá agregados para tu agenda.</div>
             <span class="price-tag">Personalizar ➔</span>
         </div>
-
-        <a href="https://docentesbrown-oficial.github.io/Talleres/" target="_blank" class="card-link">
-            <div class="product-card" style="background-color: #eef6fc; border: 1px solid #dcebf7;">
-                <div class="product-title">Talleres y Capacitaciones</div>
-                <div class="product-desc">Inscripción a cursos y talleres de Docentes Brown.</div>
-                <span class="price-tag" style="background-color: var(--primary-blue); color: white;">Ir a la Web ➔</span>
-            </div>
-        </a>
-
-        <div class="admin-footer">
+<div class="admin-footer">
             <span onclick="openAdminLogin()">2026 Docentes Brown | Acceso Admin</span>
         </div>
     </div>
@@ -285,10 +276,11 @@
             </div>
 
             <div class="coupon-section">
-                <label style="font-weight:600; color:var(--primary-blue); font-size:0.9rem;">¿Tenés un código promocional?</label>
+                <label for="coupon-code-input" style="font-weight:600; color:var(--primary-blue); font-size:0.9rem;">Código promocional</label>
                 <div class="coupon-input-group">
-                    <input type="text" id="coupon-code-input" placeholder="Ingresalo acá" style="text-transform:uppercase;">
-                    <button class="btn-apply-coupon" onclick="applyCoupon()">Aplicar</button>
+                    <select id="coupon-code-input" onchange="applyCoupon()" aria-label="Seleccionar código promocional">
+                        <option value="">Sin código promocional</option>
+                    </select>
                 </div>
                 <div id="coupon-msg"></div>
             </div>
@@ -446,6 +438,7 @@
             CATALOG.agregados = [];
             CATALOG.cupones = [];
             parseData(csv);
+            populateCouponSelect();
         }
 
         function parseData(csv) {
@@ -471,6 +464,35 @@
             });
         }
 
+
+        function populateCouponSelect() {
+            const select = document.getElementById('coupon-code-input');
+            if (!select) return;
+
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Sin código promocional</option>';
+
+            const uniqueCoupons = [];
+            const seenCodes = new Set();
+            CATALOG.cupones.forEach(coupon => {
+                if (!coupon || !coupon.code || seenCodes.has(coupon.code)) return;
+                seenCodes.add(coupon.code);
+                uniqueCoupons.push(coupon);
+            });
+
+            uniqueCoupons.forEach(coupon => {
+                const option = document.createElement('option');
+                option.value = coupon.code;
+                option.textContent = coupon.code === 'DOSPAGOS'
+                    ? 'DOSPAGOS — 50% ahora y 50% en la entrega'
+                    : `${coupon.code} — ${coupon.discount}% de descuento`;
+                select.appendChild(option);
+            });
+
+            if (currentValue && seenCodes.has(currentValue)) {
+                select.value = currentValue;
+            }
+        }
 
         async function loadCoverCatalog() {
             coverCatalog = [];
@@ -913,10 +935,19 @@
         }
 
         function applyCoupon() {
-            const code = document.getElementById('coupon-code-input').value.toUpperCase().trim();
+            const select = document.getElementById('coupon-code-input');
+            const code = (select?.value || '').toUpperCase().trim();
             const msg = document.getElementById('coupon-msg');
-            
-            if(!code) return;
+
+            if (!code) {
+                appliedDiscount = { code: '', percent: 0, isTwoPayments: false };
+                msg.innerText = '';
+                msg.className = '';
+                renderCartItems();
+                updateCartBar();
+                return;
+            }
+
             const found = CATALOG.cupones.find(c => c.code === code);
             
             if(found) {
@@ -930,15 +961,15 @@
                     ? 'Código DOSPAGOS aplicado: abonás 50% ahora y el 50% restante al momento de la entrega.'
                     : `¡Código ${found.code} aplicado! Tenés ${found.discount}% de descuento sobre el total.`;
                 msg.className = 'success-text';
-                renderCartItems();
-                updateCartBar();
             } else {
                 appliedDiscount = { code: '', percent: 0, isTwoPayments: false };
-                msg.innerText = "Código inválido o expirado.";
+                msg.innerText = 'El código seleccionado ya no está disponible.';
                 msg.className = 'error-text';
-                renderCartItems();
-                updateCartBar();
+                select.value = '';
             }
+
+            renderCartItems();
+            updateCartBar();
         }
 
         function sendToWhatsApp() {
