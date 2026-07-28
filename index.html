@@ -258,43 +258,34 @@
                 <h3 style="font-size: 1.1rem; color: var(--primary-blue); margin-bottom: 15px;">Tus Datos</h3>
                 
                 <div class="cart-data-input">
-                    <input type="text" id="client-name" placeholder="Nombre Completo *">
-                </div>
-                
-                <div class="cart-data-input">
-                    <input type="text" id="client-cover-name" placeholder="Nombre para la tapa *">
-                    <div style="margin-top:4px; font-size:0.8rem; color:var(--text-secondary); margin-left:5px;">(Tal cual querés que figure en el cuaderno)</div>
-                </div>
-
-                <div class="cart-data-input">
-                    <input type="number" id="client-dni" placeholder="DNI *">
+                    <input type="text" id="client-name" placeholder="Nombre Completo *" autocomplete="name">
                 </div>
 
                 <div class="cart-data-input" style="margin-top: 20px;">
                     <label class="cart-data-label">Método de entrega *</label>
                     <div class="delivery-options">
                         <label class="radio-item">
-                            <input type="radio" name="deliveryMethod" value="envio" id="del-envio">
+                            <input type="radio" name="deliveryMethod" value="andreani" id="del-envio">
                             <div class="radio-content">
-                                <span class="radio-title">Envío</span>
+                                <span class="radio-title">Envío por ANDREANI</span>
                                 <span class="radio-desc">A cargo del comprador</span>
                             </div>
                         </label>
                         <label class="radio-item">
-                            <input type="radio" name="deliveryMethod" value="presencial" id="del-presencial">
+                            <input type="radio" name="deliveryMethod" value="isfd41" id="del-presencial">
                             <div class="radio-content">
-                                <span class="radio-title">Entrega Presencial</span>
-                                <span class="radio-desc">Gratis (puntos de entrega en Alte. Brown)</span>
+                                <span class="radio-title">Entrega Presencial en ISFD 41</span>
+                                <span class="radio-desc">Coordinaremos día y horario de entrega</span>
                             </div>
                         </label>
                     </div>
                 </div>
 
-                <div id="data-error-msg" style="color: var(--danger-red); font-weight:600; font-size: 0.9rem; margin-top: 15px; display: none;">⚠️ Por favor completa todos tus datos y elige el envío.</div>
+                <div id="data-error-msg" style="color: var(--danger-red); font-weight:600; font-size: 0.9rem; margin-top: 15px; display: none;">⚠️ Ingresá tu nombre completo y elegí el método de entrega.</div>
             </div>
 
             <div class="coupon-section">
-                <label style="font-weight:600; color:var(--primary-blue); font-size:0.9rem;">¿Tenés un código de descuento?</label>
+                <label style="font-weight:600; color:var(--primary-blue); font-size:0.9rem;">¿Tenés un código promocional?</label>
                 <div class="coupon-input-group">
                     <input type="text" id="coupon-code-input" placeholder="Ingresalo acá" style="text-transform:uppercase;">
                     <button class="btn-apply-coupon" onclick="applyCoupon()">Aplicar</button>
@@ -312,8 +303,16 @@
                     <span id="cart-discount" style="font-weight:600; font-size:1.1rem; color:var(--accent-green);">-$0</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom: 15px; align-items: center;">
-                    <span style="font-weight:800; font-size:1.2rem; color: var(--text-main);">Total Final:</span>
+                    <span style="font-weight:800; font-size:1.2rem; color: var(--text-main);">Total del pedido:</span>
                     <span id="cart-final-total" style="font-weight:800; font-size:1.8rem; color:var(--primary-blue);">$0</span>
+                </div>
+                <div id="payment-now-row" style="display:none; justify-content:space-between; margin-bottom: 8px; align-items: center; background:#eef6fc; padding:12px 14px; border-radius:12px;">
+                    <span style="font-weight:800; font-size:1rem; color:var(--primary-blue);">A pagar ahora (50%):</span>
+                    <span id="payment-now-amount" style="font-weight:800; font-size:1.25rem; color:var(--primary-blue);">$0</span>
+                </div>
+                <div id="payment-delivery-row" style="display:none; justify-content:space-between; margin-bottom: 15px; align-items: center; padding:0 14px;">
+                    <span style="font-weight:600; font-size:0.95rem; color:var(--text-secondary);">Saldo al momento de la entrega:</span>
+                    <span id="payment-delivery-amount" style="font-weight:700; font-size:1.05rem; color:var(--text-main);">$0</span>
                 </div>
                 <button class="btn-whatsapp" onclick="sendToWhatsApp()">Confirmar por WhatsApp</button>
             </div>
@@ -342,9 +341,9 @@
             </div>
             
             <div style="margin-bottom: 30px;">
-                <h3 class="section-title">Cupones Activos (Desde Excel)</h3>
+                <h3 class="section-title">Códigos Promocionales (Desde Excel)</h3>
                 <p style="font-size:0.9rem; color:#888; margin-bottom:15px;">
-                    Gestioná los cupones en tu Google Sheet:<br>Columna M: <b>CODIGO</b> | Columna N: <b>% (Número)</b>
+                    Gestioná los códigos promocionales en tu Google Sheet:<br>Columna G: <b>CÓDIGO</b> | Columna H: <b>% de descuento</b><br><span class="small-note">Para DOSPAGOS, podés dejar 0 en la columna H.</span>
                 </p>
                 <ul class="admin-list" id="active-coupons-list">
                     </ul>
@@ -366,8 +365,7 @@
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXegIgxvYuUiHgQBgJIvIexndD6QYUi-UKz0lGem04RYDLkOo3OmdXNME1e63A3g/pub?gid=885679872&single=true&output=csv";
         const WA_NUMBER = "5491153196358";
         const ADMIN_PASS = "Brown2025";
-        const MAX_DISCOUNT_CAP = 3000;
-
+        
         // TAPAS: se obtienen exclusivamente de la carpeta de Google Drive.
         // No se leen desde la hoja de cálculo ni desde una lista fija dentro del HTML.
         const COVER_FOLDER_ID = "18h2v0vtZxagwB9WV_eyidSHO9uvh6zDr";
@@ -380,7 +378,7 @@
         let CATALOG = { profesores: [], agregados: [], cupones: [] };
         let cart = [];
         let currentProductType = '';
-        let appliedDiscount = { code: '', percent: 0 };
+        let appliedDiscount = { code: '', percent: 0, isTwoPayments: false };
         let coverCatalog = [];
         let coverCatalogError = '';
         let selectedCoverId = '';
@@ -460,10 +458,13 @@
                 // Columnas E y F: agregados para la agenda y sus precios.
                 if(cols[4]) CATALOG.agregados.push({ name: cols[4], price: parseInt(cols[5]) || 0 });
                 
-                if(cols[12] && cols[13]) {
-                    const code = cols[12].trim().toUpperCase();
-                    const percent = parseInt(cols[13].trim());
-                    if(code && !isNaN(percent)) {
+                // Columnas G y H: código promocional y porcentaje de descuento.
+                // DOSPAGOS es un plan de pago, no un descuento: 50% ahora y 50% en la entrega.
+                if(cols[6]) {
+                    const code = cols[6].trim().toUpperCase();
+                    const rawPercent = (cols[7] || '').trim();
+                    const percent = code === 'DOSPAGOS' ? 0 : parseFloat(rawPercent);
+                    if(code && (code === 'DOSPAGOS' || !isNaN(percent))) {
                         CATALOG.cupones.push({ code: code, discount: percent });
                     }
                 }
@@ -617,10 +618,11 @@
             const list = document.getElementById('active-coupons-list');
             list.innerHTML = '';
             if(CATALOG.cupones.length === 0) {
-                list.innerHTML = '<li>No hay cupones cargados en las columnas M y N del Excel.</li>';
+                list.innerHTML = '<li>No hay códigos promocionales cargados en las columnas G y H del Excel.</li>';
             } else {
                 CATALOG.cupones.forEach(c => {
-                    list.innerHTML += `<li><span class="admin-code">${c.code}</span><span class="admin-discount">-${c.discount}%</span></li>`;
+                    const benefit = c.code === 'DOSPAGOS' ? '50% ahora + 50% entrega' : `-${c.discount}%`;
+                    list.innerHTML += `<li><span class="admin-code">${c.code}</span><span class="admin-discount">${benefit}</span></li>`;
                 });
             }
             document.getElementById('admin-dashboard-modal').classList.add('active');
@@ -815,19 +817,25 @@
         }
 
         function calculateDiscountAmount(subtotal, percent) {
-            let amount = Math.floor(subtotal * percent / 100);
-            if (amount > MAX_DISCOUNT_CAP) {
-                return MAX_DISCOUNT_CAP;
-            }
-            return amount;
+            return Math.round(subtotal * percent / 100);
+        }
+
+        function calculateTwoPayments(total) {
+            const payNow = Math.ceil(total / 2);
+            return { payNow, payOnDelivery: total - payNow };
         }
 
         function updateCartBar() {
             if (cart.length > 0) {
                 document.getElementById('cart-float').classList.remove('hidden');
-                let sum = getCartFinalTotal();
+                const sum = getCartFinalTotal();
                 document.getElementById('cart-count').innerText = `${cart.length} ítem(s)`;
-                document.getElementById('cart-float-total').innerText = `Total: $${sum.toLocaleString('es-AR')}`;
+                if (appliedDiscount.isTwoPayments) {
+                    const payment = calculateTwoPayments(sum);
+                    document.getElementById('cart-float-total').innerText = `Ahora: $${payment.payNow.toLocaleString('es-AR')}`;
+                } else {
+                    document.getElementById('cart-float-total').innerText = `Total: $${sum.toLocaleString('es-AR')}`;
+                }
             } else {
                 document.getElementById('cart-float').classList.add('hidden');
             }
@@ -854,15 +862,30 @@
                 discountAmount = calculateDiscountAmount(subtotal, appliedDiscount.percent);
                 finalTotal = subtotal - discountAmount;
                 document.getElementById('discount-row').style.display = 'flex';
-                let extraText = discountAmount === MAX_DISCOUNT_CAP ? '(Tope $3.000)' : '';
-                document.getElementById('cart-discount').innerText = `-$${discountAmount.toLocaleString('es-AR')} ${extraText}`;
+                document.getElementById('cart-discount').innerText = `-$${discountAmount.toLocaleString('es-AR')} (${appliedDiscount.percent}%)`;
             } else {
                 document.getElementById('discount-row').style.display = 'none';
             }
 
+            const paymentNowRow = document.getElementById('payment-now-row');
+            const paymentDeliveryRow = document.getElementById('payment-delivery-row');
+            if (appliedDiscount.isTwoPayments && subtotal > 0) {
+                const payment = calculateTwoPayments(finalTotal);
+                paymentNowRow.style.display = 'flex';
+                paymentDeliveryRow.style.display = 'flex';
+                document.getElementById('payment-now-amount').innerText = `$${payment.payNow.toLocaleString('es-AR')}`;
+                document.getElementById('payment-delivery-amount').innerText = `$${payment.payOnDelivery.toLocaleString('es-AR')}`;
+            } else {
+                paymentNowRow.style.display = 'none';
+                paymentDeliveryRow.style.display = 'none';
+            }
+
             if (cart.length === 0) {
                 container.innerHTML = '<div style="text-align:center; color:#999; margin-top:50px; display:flex; flex-direction:column; align-items:center;"><span style="font-size:3rem; margin-bottom:20px;">🛒</span><p>Tu carrito está vacío.</p></div>';
+                document.getElementById('cart-subtotal').innerText = '$0';
                 document.getElementById('cart-final-total').innerText = '$0';
+                document.getElementById('payment-now-row').style.display = 'none';
+                document.getElementById('payment-delivery-row').style.display = 'none';
                 
                 const personalData = document.getElementById('personal-data-section');
                 if(personalData) personalData.style.display = 'none';
@@ -883,7 +906,7 @@
 
         function removeFromCart(index) {
             cart.splice(index, 1);
-            if(cart.length === 0) appliedDiscount = { code: '', percent: 0 }; 
+            if(cart.length === 0) appliedDiscount = { code: '', percent: 0, isTwoPayments: false }; 
             renderCartItems();
             updateCartBar();
             if(cart.length === 0) closeCartModal();
@@ -897,16 +920,24 @@
             const found = CATALOG.cupones.find(c => c.code === code);
             
             if(found) {
-                appliedDiscount = { code: found.code, percent: found.discount };
-                msg.innerText = `¡Éxito! Cupón ${found.code} aplicado.`;
+                const isTwoPayments = found.code === 'DOSPAGOS';
+                appliedDiscount = {
+                    code: found.code,
+                    percent: isTwoPayments ? 0 : found.discount,
+                    isTwoPayments
+                };
+                msg.innerText = isTwoPayments
+                    ? 'Código DOSPAGOS aplicado: abonás 50% ahora y el 50% restante al momento de la entrega.'
+                    : `¡Código ${found.code} aplicado! Tenés ${found.discount}% de descuento sobre el total.`;
                 msg.className = 'success-text';
                 renderCartItems();
                 updateCartBar();
             } else {
-                appliedDiscount = { code: '', percent: 0 };
+                appliedDiscount = { code: '', percent: 0, isTwoPayments: false };
                 msg.innerText = "Código inválido o expirado.";
                 msg.className = 'error-text';
                 renderCartItems();
+                updateCartBar();
             }
         }
 
@@ -914,14 +945,11 @@
             if (cart.length === 0) return;
 
             const clientName = document.getElementById('client-name').value.trim();
-            const clientCover = document.getElementById('client-cover-name').value.trim();
-            const clientDni = document.getElementById('client-dni').value.trim();
-            
             const deliveryEnvio = document.getElementById('del-envio');
             const deliveryPresencial = document.getElementById('del-presencial');
             const errorMsg = document.getElementById('data-error-msg');
 
-            if (!clientName || !clientCover || !clientDni || (!deliveryEnvio.checked && !deliveryPresencial.checked)) {
+            if (!clientName || (!deliveryEnvio.checked && !deliveryPresencial.checked)) {
                 errorMsg.style.display = 'block';
                 return;
             } else {
@@ -932,10 +960,10 @@
 
             text += "+ *MIS DATOS*\n";
             text += `Nombre: ${clientName}\n`;
-            text += `DNI: ${clientDni}\n`;
-            text += `Nombre en Tapa: ${clientCover}\n`;
             
-            let deliveryText = deliveryEnvio.checked ? "Envío (A cargo del comprador)" : "Entrega Presencial (Gratis en Alte. Brown)";
+            const deliveryText = deliveryEnvio.checked
+                ? "Envío por ANDREANI (a cargo del comprador)"
+                : "Entrega Presencial en ISFD 41";
             text += `Entrega: ${deliveryText}\n`;
             
             text += "------------------------------\n\n";
@@ -950,11 +978,19 @@
                 subtotal += item.total;
             });
 
-            if(appliedDiscount.percent > 0) {
-                let discountAmount = calculateDiscountAmount(subtotal, appliedDiscount.percent);
-                text += `Subtotal: $${subtotal}\n`;
-                text += `*Descuento (${appliedDiscount.code}): -$${discountAmount}*\n`;
-                text += `*TOTAL FINAL: $${(subtotal - discountAmount).toLocaleString('es-AR')}*`;
+            if(appliedDiscount.isTwoPayments) {
+                const payment = calculateTwoPayments(subtotal);
+                text += `Código promocional: *DOSPAGOS*\n`;
+                text += `*TOTAL DEL PEDIDO: $${subtotal.toLocaleString('es-AR')}*\n`;
+                text += `*A PAGAR AHORA (50%): $${payment.payNow.toLocaleString('es-AR')}*\n`;
+                text += `Saldo al momento de la entrega: $${payment.payOnDelivery.toLocaleString('es-AR')}`;
+            } else if(appliedDiscount.percent > 0) {
+                const discountAmount = calculateDiscountAmount(subtotal, appliedDiscount.percent);
+                const finalTotal = subtotal - discountAmount;
+                text += `Subtotal: $${subtotal.toLocaleString('es-AR')}\n`;
+                text += `Código promocional: *${appliedDiscount.code}*\n`;
+                text += `Descuento (${appliedDiscount.percent}%): -$${discountAmount.toLocaleString('es-AR')}\n`;
+                text += `*TOTAL FINAL: $${finalTotal.toLocaleString('es-AR')}*`;
             } else {
                 text += `*TOTAL FINAL: $${subtotal.toLocaleString('es-AR')}*`;
             }
