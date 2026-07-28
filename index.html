@@ -101,6 +101,26 @@
         select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231A3B5C%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-13%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2013l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.7-9.2-5.4-13z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto; padding-right: 40px; }
         .select-wrapper { position: relative; }
 
+
+        /* GALERÍA DE TAPAS */
+        .cover-helper { margin: -2px 0 12px; color: var(--text-secondary); font-size: 0.92rem; line-height: 1.35; }
+        .cover-gallery-status { margin: 10px 0 14px; padding: 12px 14px; border-radius: 12px; background: #f2f2f7; color: var(--text-secondary); font-size: 0.9rem; }
+        .cover-gallery-status.error { background: #fff4f3; color: var(--danger-red); }
+        .cover-gallery-status:empty { display: none; }
+        .cover-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+        .cover-option { position: relative; width: 100%; padding: 0; overflow: hidden; border: 2px solid #e5e5ea; border-radius: 16px; background: #fff; cursor: pointer; text-align: left; transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease; font-family: var(--font-main); }
+        .cover-option:active { transform: scale(0.98); }
+        .cover-option.selected { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(26, 59, 92, 0.12); }
+        .cover-image-wrap { position: relative; width: 100%; aspect-ratio: 7 / 10; overflow: hidden; background: #f2f2f7; }
+        .cover-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .cover-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 14px; text-align: center; color: var(--text-secondary); font-size: 0.85rem; line-height: 1.3; }
+        .cover-label { display: block; padding: 11px 10px 12px; color: var(--primary-blue); font-weight: 800; font-size: 0.95rem; line-height: 1.2; text-align: center; }
+        .cover-check { position: absolute; top: 9px; right: 9px; width: 28px; height: 28px; border-radius: 50%; background: var(--primary-blue); color: #fff; display: none; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; box-shadow: 0 3px 10px rgba(0,0,0,0.2); }
+        .cover-option.selected .cover-check { display: flex; }
+        .cover-selected-summary { display: none; margin-top: 12px; padding: 11px 13px; border-radius: 12px; background: #eef6fc; color: var(--primary-blue); font-weight: 700; font-size: 0.92rem; }
+        .cover-selected-summary.show { display: block; }
+        @media (min-width: 520px) { .cover-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
         /* CHECKBOXES */
         .checkbox-list { display: flex; flex-direction: column; border-radius: var(--radius-input); overflow: hidden; border: 1px solid #e5e5ea; }
         .checkbox-item-wrapper { display: flex; flex-direction: column; background: #fff; border-bottom: 1px solid #e5e5ea; }
@@ -347,7 +367,12 @@
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXegIgxvYuUiHgQBgJIvIexndD6QYUi-UKz0lGem04RYDLkOo3OmdXNME1e63A3g/pub?gid=885679872&single=true&output=csv";
         const WA_NUMBER = "5491153196358";
         const ADMIN_PASS = "Brown2025";
-        const MAX_DISCOUNT_CAP = 3000; 
+        const MAX_DISCOUNT_CAP = 3000;
+
+        // Pegá aquí la URL del Web App de Google Apps Script que lista las tapas.
+        // Mientras siga el texto de ejemplo, la tienda mostrará los temas sin imagen como respaldo.
+        const COVERS_API_URL = "https://script.google.com/macros/s/AKfycbzjZS1BWh0XBanQGWgGD4EJGbI4MqQwBbeUV60F68p7-2VNd2558gzCec-Vxgwd5saq/exec";
+
 
         // LISTA DE TEMAS (Checklist)
         const COVER_THEMES = [
@@ -362,17 +387,26 @@
         let cart = [];
         let currentProductType = '';
         let appliedDiscount = { code: '', percent: 0 };
+        let coverCatalog = [];
+        let coverCatalogError = '';
+        let selectedCoverId = '';
 
-        window.onload = function() {
-            fetch(CSV_URL)
-                .then(res => res.text())
-                .then(csv => { 
-                    parseData(csv); 
-                    const loader = document.getElementById('loading-screen');
-                    loader.style.opacity = '0'; 
-                    setTimeout(()=>{loader.style.display='none'}, 500); 
-                })
-                .catch(err => { console.error(err); alert("Error de conexión. Recarga la página."); });
+        window.onload = async function() {
+            try {
+                const res = await fetch(CSV_URL);
+                if (!res.ok) throw new Error(`No se pudo cargar el catálogo (${res.status})`);
+                const csv = await res.text();
+                parseData(csv);
+                await loadCoverCatalog();
+            } catch (err) {
+                console.error(err);
+                coverCatalog = buildFallbackCoverCatalog();
+                alert("No se pudo cargar una parte del catálogo. Recargá la página.");
+            } finally {
+                const loader = document.getElementById('loading-screen');
+                loader.style.opacity = '0';
+                setTimeout(() => { loader.style.display = 'none'; }, 500);
+            }
         };
 
         function parseData(csv) {
@@ -394,6 +428,115 @@
                     }
                 }
             });
+        }
+
+
+        function buildFallbackCoverCatalog() {
+            const names = CATALOG.temas.length > 0
+                ? CATALOG.temas.map(item => item.name)
+                : COVER_THEMES;
+            return [...new Set(names.filter(Boolean))]
+                .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))
+                .map((name, index) => ({ id: `fallback-${index}`, name, image: '' }));
+        }
+
+        async function loadCoverCatalog() {
+            coverCatalogError = '';
+
+            if (!COVERS_API_URL || COVERS_API_URL.includes('PEGAR_AQUI')) {
+                coverCatalog = buildFallbackCoverCatalog();
+                coverCatalogError = 'La galería todavía no está conectada con Google Drive. Se muestran los nombres disponibles como respaldo.';
+                return;
+            }
+
+            try {
+                const response = await fetch(COVERS_API_URL, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`Respuesta ${response.status}`);
+                const payload = await response.json();
+                const items = Array.isArray(payload) ? payload : payload.items;
+                if (!Array.isArray(items)) throw new Error('El Web App no devolvió una lista válida.');
+
+                coverCatalog = items
+                    .filter(item => item && item.name)
+                    .map((item, index) => ({
+                        id: String(item.id || `cover-${index}`),
+                        name: String(item.name).trim(),
+                        image: String(item.image || item.thumbnail || '').trim()
+                    }))
+                    .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+
+                if (coverCatalog.length === 0) {
+                    throw new Error('La carpeta no contiene imágenes compatibles.');
+                }
+            } catch (error) {
+                console.error('Error al cargar tapas desde Drive:', error);
+                coverCatalog = buildFallbackCoverCatalog();
+                coverCatalogError = 'No pudimos cargar las imágenes de las tapas. Podés seguir eligiendo por nombre.';
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function renderCoverGallery() {
+            const gallery = document.getElementById('cover-gallery');
+            const status = document.getElementById('cover-gallery-status');
+            const summary = document.getElementById('cover-selected-summary');
+            if (!gallery || !status) return;
+
+            selectedCoverId = '';
+            if (summary) {
+                summary.classList.remove('show');
+                summary.textContent = '';
+            }
+
+            status.textContent = coverCatalogError;
+            status.classList.toggle('error', Boolean(coverCatalogError));
+
+            if (coverCatalog.length === 0) {
+                gallery.innerHTML = '';
+                status.textContent = 'No hay tapas disponibles por el momento.';
+                status.classList.add('error');
+                return;
+            }
+
+            gallery.innerHTML = coverCatalog.map(cover => {
+                const safeId = escapeHtml(cover.id);
+                const safeName = escapeHtml(cover.name);
+                const visual = cover.image
+                    ? `<img class="cover-image" src="${escapeHtml(cover.image)}" alt="Tapa ${safeName}" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<div class=&quot;cover-placeholder&quot;>Vista previa no disponible</div>'">`
+                    : `<div class="cover-placeholder">${safeName}</div>`;
+
+                return `<button type="button" class="cover-option" data-cover-id="${safeId}" data-cover-name="${safeName}" onclick="selectCover(this)">
+                            <span class="cover-check">✓</span>
+                            <div class="cover-image-wrap">${visual}</div>
+                            <span class="cover-label">${safeName}</span>
+                        </button>`;
+            }).join('');
+        }
+
+        function selectCover(button) {
+            document.querySelectorAll('.cover-option').forEach(option => option.classList.remove('selected'));
+            button.classList.add('selected');
+
+            selectedCoverId = button.dataset.coverId || '';
+            const selectedName = button.dataset.coverName || '';
+            const input = document.getElementById('input-tema');
+            if (input) input.value = selectedName;
+
+            const summary = document.getElementById('cover-selected-summary');
+            if (summary) {
+                summary.textContent = `Tapa elegida: ${selectedName}`;
+                summary.classList.add('show');
+            }
+
+            updateTotal();
         }
 
         function openAdminLogin() { document.getElementById('admin-login-modal').classList.add('active'); }
@@ -455,17 +598,14 @@
             else if (type === 'maestros') html += createSelect("1. Cantidad de Grados", "base", CATALOG.maestros);
 
             {
-                // SECCION DE TEMA (MODIFICADA: Ahora es un Select)
-                let themesOptions = COVER_THEMES.map(t => `<option value="${t}" data-price="0">${t}</option>`).join('');
-                
+                // GALERÍA VISUAL DE TAPAS
                 html += `<div class="form-group">
                             <div class="section-title">2. Elegí el tema de la portada <span style="color:var(--danger-red)">*</span></div>
-                            <div class="select-wrapper">
-                                <select id="input-tema" onchange="updateTotal()">
-                                    <option value="" disabled selected>Selecciona una opción...</option>
-                                    ${themesOptions}
-                                </select>
-                            </div>
+                            <div class="cover-helper">Tocá una tapa para verla seleccionada.</div>
+                            <div id="cover-gallery-status" class="cover-gallery-status"></div>
+                            <div id="cover-gallery" class="cover-grid"></div>
+                            <div id="cover-selected-summary" class="cover-selected-summary"></div>
+                            <input type="hidden" id="input-tema" value="">
                          </div>`;
 
                 const noneOption = { name: "Ninguno", price: 0 };
@@ -475,6 +615,7 @@
                 if(CATALOG.adicionales.length > 0) html += createCheckboxSection("4. Adicionales", "add", addItems);
             }
             container.innerHTML = html;
+            renderCoverGallery();
         }
 
         function createSelect(label, id, items, defaultText = "Seleccionar opción...") {
@@ -527,6 +668,9 @@
                 total += parseInt(sel.options[sel.selectedIndex]?.dataset.price || 0);
                 if (sel.value === "") errors.push("Falta seleccionar opción");
             });
+
+            const temaInput = document.getElementById('input-tema');
+            if (temaInput && !temaInput.value) errors.push("Elegí una tapa");
 
             if(document.getElementById('group-lib') && document.querySelectorAll('#group-lib input:checked').length === 0) errors.push("Elige librería");
             if(document.getElementById('group-add') && document.querySelectorAll('#group-add input:checked').length === 0) errors.push("Elige adicionales");
