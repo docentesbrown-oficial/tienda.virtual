@@ -152,7 +152,6 @@
         .shirt-image-wrap { width: 100%; aspect-ratio: 4 / 5; overflow: hidden; background: #f3f3f3; }
         .shirt-image { width: 100%; height: 100%; object-fit: contain; display: block; }
         .shirt-label { display: block; padding: 9px 8px 10px; text-align: center; font-size: 0.79rem; font-weight: 800; line-height: 1.2; }
-        .shirt-folder-link { display: inline-flex; margin-top: 12px; color: #fff; font-size: 0.84rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
         @media (min-width: 520px) { .shirt-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
         /* CHECKBOXES */
@@ -400,7 +399,6 @@
         // REMERAS SIN RECREO: la carpeta se usa solo como vidriera visual.
         // El cliente únicamente elige SÍ o NO; modelo, talle y color se coordinan por WhatsApp.
         const SHIRT_FOLDER_ID = "1mjLOqhA80otwFtAXS3HOeMHwOSYE0fn5";
-        const SHIRT_FOLDER_URL = `https://drive.google.com/drive/folders/${SHIRT_FOLDER_ID}`;
         const SHIRTS_API_URL = `${COVERS_API_URL}?type=shirts`;
         const SHIRT_PROMO_PRICE = 20000;
 
@@ -868,7 +866,6 @@
                                 <p class="shirt-models-helper">Son solo una referencia visual: no tenés que elegir un modelo en esta pantalla.</p>
                                 <div id="shirt-gallery-status" class="shirt-gallery-status"></div>
                                 <div id="shirt-gallery" class="shirt-grid"></div>
-                                <a class="shirt-folder-link" href="${SHIRT_FOLDER_URL}" target="_blank" rel="noopener noreferrer">Ver carpeta completa de remeras ↗</a>
                             </div>
                         </div>
                      </div>`;
