@@ -125,6 +125,36 @@
         .empty-options-note { padding: 14px; border-radius: 12px; background: #f2f2f7; color: var(--text-secondary); font-size: 0.92rem; line-height: 1.4; }
         @media (min-width: 520px) { .cover-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
+
+        /* PROMO REMERA SIN RECREO */
+        .shirt-promo-card { margin-top: 8px; padding: 18px; border-radius: 18px; background: linear-gradient(145deg, #1a1a1b, #303033); color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,0.16); }
+        .shirt-promo-kicker { display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 999px; background: #b35c44; color: #fff; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
+        .shirt-promo-title { margin: 12px 0 5px; font-family: var(--font-brand); font-size: 1.55rem; line-height: 1.05; }
+        .shirt-promo-price { font-size: 1.75rem; font-weight: 800; margin: 4px 0 8px; }
+        .shirt-promo-copy { margin: 0; color: rgba(255,255,255,0.78); font-size: 0.9rem; line-height: 1.4; }
+        .shirt-choice-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+        .shirt-choice { display: flex; align-items: flex-start; gap: 11px; padding: 13px; border: 1px solid rgba(255,255,255,0.2); border-radius: 13px; background: rgba(255,255,255,0.07); cursor: pointer; }
+        .shirt-choice:has(input:checked) { border-color: #fff; background: rgba(255,255,255,0.16); }
+        .shirt-choice input[type="radio"] { width: 20px; height: 20px; margin: 1px 0 0; accent-color: #b35c44; flex-shrink: 0; }
+        .shirt-choice-text { display: flex; flex-direction: column; gap: 3px; }
+        .shirt-choice-title { font-weight: 800; color: #fff; }
+        .shirt-choice-desc { color: rgba(255,255,255,0.72); font-size: 0.82rem; line-height: 1.35; }
+        .shirt-choice-summary { display: none; margin-top: 12px; padding: 10px 12px; border-radius: 11px; background: rgba(255,255,255,0.12); color: #fff; font-size: 0.87rem; font-weight: 700; }
+        .shirt-choice-summary.show { display: block; }
+        .shirt-models-box { margin-top: 16px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.18); }
+        .shirt-models-title { margin: 0 0 4px; color: #fff; font-weight: 800; font-size: 0.95rem; }
+        .shirt-models-helper { margin: 0 0 12px; color: rgba(255,255,255,0.65); font-size: 0.8rem; line-height: 1.35; }
+        .shirt-gallery-status { margin: 10px 0 12px; padding: 10px 12px; border-radius: 11px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); font-size: 0.82rem; }
+        .shirt-gallery-status.error { background: rgba(179,92,68,0.25); color: #fff; }
+        .shirt-gallery-status:empty { display: none; }
+        .shirt-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .shirt-card { overflow: hidden; border-radius: 12px; background: #fff; color: #1a1a1b; }
+        .shirt-image-wrap { width: 100%; aspect-ratio: 4 / 5; overflow: hidden; background: #f3f3f3; }
+        .shirt-image { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .shirt-label { display: block; padding: 9px 8px 10px; text-align: center; font-size: 0.79rem; font-weight: 800; line-height: 1.2; }
+        .shirt-folder-link { display: inline-flex; margin-top: 12px; color: #fff; font-size: 0.84rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+        @media (min-width: 520px) { .shirt-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
         /* CHECKBOXES */
         .checkbox-list { display: flex; flex-direction: column; border-radius: var(--radius-input); overflow: hidden; border: 1px solid #e5e5ea; }
         .checkbox-item-wrapper { display: flex; flex-direction: column; background: #fff; border-bottom: 1px solid #e5e5ea; }
@@ -291,7 +321,7 @@
                     <span id="cart-subtotal" style="font-weight:600; font-size:1.1rem; color:var(--text-main);">$0</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom: 15px; align-items: center; display:none;" id="discount-row">
-                    <span style="font-weight:600; font-size:1rem; color: var(--accent-green);">Descuento:</span>
+                    <span style="font-weight:600; font-size:1rem; color: var(--accent-green);">Descuento (agenda y agregados):</span>
                     <span id="cart-discount" style="font-weight:600; font-size:1.1rem; color:var(--accent-green);">-$0</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom: 15px; align-items: center;">
@@ -367,6 +397,13 @@
         // para leer la carpeta de tapas.
         const COVERS_API_URL = "https://script.google.com/macros/s/AKfycbzjZS1BWh0XBanQGWgGD4EJGbI4MqQwBbeUV60F68p7-2VNd2558gzCec-Vxgwd5saq/exec";
 
+        // REMERAS SIN RECREO: la carpeta se usa solo como vidriera visual.
+        // El cliente únicamente elige SÍ o NO; modelo, talle y color se coordinan por WhatsApp.
+        const SHIRT_FOLDER_ID = "1mjLOqhA80otwFtAXS3HOeMHwOSYE0fn5";
+        const SHIRT_FOLDER_URL = `https://drive.google.com/drive/folders/${SHIRT_FOLDER_ID}`;
+        const SHIRTS_API_URL = `${COVERS_API_URL}?type=shirts`;
+        const SHIRT_PROMO_PRICE = 20000;
+
         let CATALOG = { profesores: [], agregados: [], cupones: [] };
         let cart = [];
         let currentProductType = '';
@@ -374,6 +411,8 @@
         let coverCatalog = [];
         let coverCatalogError = '';
         let selectedCoverId = '';
+        let shirtCatalog = [];
+        let shirtCatalogError = '';
 
         const REQUEST_TIMEOUT_MS = 10000;
         const PAGE_LOADER_MAX_MS = 2500;
@@ -405,9 +444,10 @@
             setTimeout(hideLoadingScreen, PAGE_LOADER_MAX_MS);
 
             try {
-                const [catalogResult, coversResult] = await Promise.allSettled([
+                const [catalogResult, coversResult, shirtsResult] = await Promise.allSettled([
                     loadSpreadsheetCatalog(),
-                    loadCoverCatalog()
+                    loadCoverCatalog(),
+                    loadShirtCatalog()
                 ]);
 
                 if (catalogResult.status === 'rejected') {
@@ -416,6 +456,10 @@
 
                 if (coversResult.status === 'rejected') {
                     console.error('Error al cargar tapas:', coversResult.reason);
+                }
+
+                if (shirtsResult.status === 'rejected') {
+                    console.error('Error al cargar remeras:', shirtsResult.reason);
                 }
             } catch (error) {
                 console.error('Error general de inicio:', error);
@@ -534,6 +578,45 @@
             }
         }
 
+        async function loadShirtCatalog() {
+            shirtCatalog = [];
+            shirtCatalogError = '';
+
+            try {
+                const response = await fetchWithTimeout(SHIRTS_API_URL, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`Respuesta ${response.status}`);
+
+                const payload = await response.json();
+                if (payload && payload.ok === false) {
+                    throw new Error(payload.error || 'El Web App informó un error.');
+                }
+
+                // Esta validación evita mostrar por error las tapas cuando el Apps Script todavía
+                // no fue actualizado para admitir la carpeta de remeras.
+                if (!payload || payload.type !== 'shirts') {
+                    throw new Error('El Web App debe actualizarse para leer la carpeta de remeras.');
+                }
+
+                const items = Array.isArray(payload.items) ? payload.items : [];
+                shirtCatalog = items
+                    .filter(item => item && item.name && (item.image || item.thumbnail))
+                    .map((item, index) => ({
+                        id: String(item.id || `shirt-${index}`),
+                        name: String(item.name).trim(),
+                        image: String(item.image || item.thumbnail || '').trim()
+                    }))
+                    .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+
+                if (shirtCatalog.length === 0) {
+                    throw new Error('La carpeta no contiene imágenes compatibles.');
+                }
+            } catch (error) {
+                console.error('Error al cargar remeras desde Drive:', error);
+                shirtCatalog = [];
+                shirtCatalogError = 'Los modelos no pudieron cargarse dentro de la página. La opción de sumar la remera sigue disponible.';
+            }
+        }
+
         function escapeHtml(value) {
             return String(value)
                 .replaceAll('&', '&amp;')
@@ -606,6 +689,59 @@
             if (wasHidden) {
                 setTimeout(() => addonsSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
             }
+        }
+
+        function renderShirtGallery() {
+            const gallery = document.getElementById('shirt-gallery');
+            const status = document.getElementById('shirt-gallery-status');
+            if (!gallery || !status) return;
+
+            status.textContent = shirtCatalogError;
+            status.classList.toggle('error', Boolean(shirtCatalogError));
+
+            if (shirtCatalog.length === 0) {
+                gallery.innerHTML = '';
+                if (!status.textContent) status.textContent = 'No hay modelos disponibles para mostrar por el momento.';
+                status.classList.add('error');
+                return;
+            }
+
+            gallery.innerHTML = shirtCatalog.map(shirt => {
+                const safeName = escapeHtml(shirt.name);
+                const visual = shirt.image
+                    ? `<img class="shirt-image" src="${escapeHtml(shirt.image)}" alt="Remera ${safeName}" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<div class=&quot;cover-placeholder&quot;>Vista previa no disponible</div>'">`
+                    : `<div class="cover-placeholder">${safeName}</div>`;
+
+                return `<div class="shirt-card">
+                            <div class="shirt-image-wrap">${visual}</div>
+                            <span class="shirt-label">${safeName}</span>
+                        </div>`;
+            }).join('');
+        }
+
+        function handleAgendaSelectionProgress() {
+            const shirtSection = document.getElementById('shirt-promo-section');
+            const hasAgendaChoice = document.querySelectorAll('#group-agenda input:checked').length > 0;
+            const wasHidden = shirtSection && !shirtSection.classList.contains('show');
+
+            if (shirtSection) shirtSection.classList.toggle('show', hasAgendaChoice);
+            updateTotal();
+
+            if (hasAgendaChoice && wasHidden) {
+                setTimeout(() => shirtSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+            }
+        }
+
+        function handleShirtChoice() {
+            const selected = document.querySelector('input[name="shirtPromo"]:checked');
+            const summary = document.getElementById('shirt-choice-summary');
+            if (summary && selected) {
+                summary.textContent = selected.value === 'yes'
+                    ? 'Remera agregada. El modelo, talle y color se coordinan luego por WhatsApp.'
+                    : 'No se agregará una remera al pedido.';
+                summary.classList.add('show');
+            }
+            updateTotal();
         }
 
         function handleCourseSelection() {
@@ -698,13 +834,48 @@
             html += `<div class="form-group progressive-section" id="agenda-addons-section">
                         <div class="section-title">3. Agregados para tu agenda: <span style="color:var(--danger-red)">*</span></div>
                         <div class="section-helper">Podés elegir uno o varios. Si no querés sumar nada, seleccioná “No agregar”.</div>
-                        ${CATALOG.agregados.length > 0
-                            ? createCheckboxListMarkup("agenda", addonItems)
-                            : '<div class="empty-options-note">No hay agregados disponibles en este momento.</div>'}
+                        ${createCheckboxListMarkup("agenda", addonItems)}
+                     </div>`;
+
+            html += `<div class="form-group progressive-section" id="shirt-promo-section">
+                        <div class="section-title">4. Promo SIN RECREO <span style="color:var(--danger-red)">*</span></div>
+                        <div class="shirt-promo-card">
+                            <span class="shirt-promo-kicker">Promo exclusiva</span>
+                            <div class="shirt-promo-title">Sumá una remera SIN RECREO</div>
+                            <div class="shirt-promo-price">$${SHIRT_PROMO_PRICE.toLocaleString('es-AR')}</div>
+                            <p class="shirt-promo-copy">La app solo registra si querés sumarla. El modelo, el talle y el color se coordinan después por WhatsApp. La remera no participa de descuentos porcentuales.</p>
+
+                            <div class="shirt-choice-list">
+                                <label class="shirt-choice">
+                                    <input type="radio" name="shirtPromo" value="no" onchange="handleShirtChoice()">
+                                    <span class="shirt-choice-text">
+                                        <span class="shirt-choice-title">No, gracias</span>
+                                        <span class="shirt-choice-desc">Quiero continuar solamente con el calificador.</span>
+                                    </span>
+                                </label>
+                                <label class="shirt-choice">
+                                    <input type="radio" name="shirtPromo" value="yes" onchange="handleShirtChoice()">
+                                    <span class="shirt-choice-text">
+                                        <span class="shirt-choice-title">Sí, sumar una remera por $${SHIRT_PROMO_PRICE.toLocaleString('es-AR')}</span>
+                                        <span class="shirt-choice-desc">Definimos modelo, talle y color al confirmar por WhatsApp.</span>
+                                    </span>
+                                </label>
+                            </div>
+                            <div id="shirt-choice-summary" class="shirt-choice-summary"></div>
+
+                            <div class="shirt-models-box">
+                                <p class="shirt-models-title">Modelos disponibles</p>
+                                <p class="shirt-models-helper">Son solo una referencia visual: no tenés que elegir un modelo en esta pantalla.</p>
+                                <div id="shirt-gallery-status" class="shirt-gallery-status"></div>
+                                <div id="shirt-gallery" class="shirt-grid"></div>
+                                <a class="shirt-folder-link" href="${SHIRT_FOLDER_URL}" target="_blank" rel="noopener noreferrer">Ver carpeta completa de remeras ↗</a>
+                            </div>
+                        </div>
                      </div>`;
 
             container.innerHTML = html;
             renderCoverGallery();
+            renderShirtGallery();
         }
 
         function createSelect(label, id, items, defaultText = "Seleccionar opción...", onChange = "updateTotal()") {
@@ -719,7 +890,7 @@
                 const isNinguno = item.name === "No agregar";
                 let onClickLogic = isNinguno ? `handleNinguno('${group}', this)` : `handleRegularItem('${group}', this)`;
                 if(isHojas) onClickLogic += `; toggleQty('${group}-${i}')`;
-                onClickLogic += `; updateTotal()`;
+                onClickLogic += group === 'agenda' ? `; handleAgendaSelectionProgress()` : `; updateTotal()`;
                 const qtyHtml = isHojas ? `<div class="qty-input-wrapper" id="qty-wrapper-${group}-${i}"><label>¿Cuántas hojas?</label><input type="number" class="qty-input" id="qty-${group}-${i}" value="10" min="1" oninput="updateTotal()"></div>` : '';
                 return `<div class="checkbox-item-wrapper"><div class="checkbox-item" onclick="document.getElementById('${group}-${i}').click()"><input type="checkbox" id="${group}-${i}" data-price="${item.price}" data-name="${escapeHtml(item.name)}" onclick="event.stopPropagation(); ${onClickLogic}"><label for="${group}-${i}">${escapeHtml(item.name)}</label><span class="checkbox-price">${item.price > 0 ? '+$'+item.price : ''}</span></div>${qtyHtml}</div>`;
             }).join('');
@@ -753,87 +924,100 @@
             let total = 0;
             let errors = [];
             
-            // Validar cantidad de cursos.
             const baseSelect = document.getElementById('input-base');
             if (baseSelect) {
                 total += parseInt(baseSelect.options[baseSelect.selectedIndex]?.dataset.price || 0);
-                if (!baseSelect.value) errors.push("Elegí la cantidad de cursos");
+                if (!baseSelect.value) errors.push('Elegí la cantidad de cursos');
             }
 
             const temaInput = document.getElementById('input-tema');
-            if (baseSelect && baseSelect.value && temaInput && !temaInput.value) errors.push("Elegí una tapa");
+            if (baseSelect && baseSelect.value && temaInput && !temaInput.value) errors.push('Elegí una tapa');
 
-            if(document.getElementById('group-agenda') && document.querySelectorAll('#group-agenda input:checked').length === 0) errors.push("Elegí los agregados o marcá No agregar");
+            const agendaGroup = document.getElementById('group-agenda');
+            const hasAgendaChoice = agendaGroup && document.querySelectorAll('#group-agenda input:checked').length > 0;
+            if (agendaGroup && !hasAgendaChoice) errors.push('Elegí los agregados o marcá No agregar');
 
-            document.querySelectorAll('input[type="checkbox"]:checked').forEach(chk => {
-                let itemPrice = parseInt(chk.dataset.price);
+            document.querySelectorAll('#group-agenda input[type="checkbox"]:checked').forEach(chk => {
+                let itemPrice = parseInt(chk.dataset.price || 0);
                 const qtyInput = document.getElementById(`qty-${chk.id}`);
-                if (qtyInput && chk.checked) itemPrice = itemPrice * (parseInt(qtyInput.value) || 1);
+                if (qtyInput) itemPrice *= (parseInt(qtyInput.value) || 1);
                 total += itemPrice;
             });
+
+            const shirtChoice = document.querySelector('input[name="shirtPromo"]:checked');
+            if (hasAgendaChoice && !shirtChoice) errors.push('Elegí si querés sumar la remera');
+            if (shirtChoice?.value === 'yes') total += SHIRT_PROMO_PRICE;
 
             document.getElementById('modal-price').innerText = `$${total.toLocaleString('es-AR')}`;
             const btn = document.getElementById('btn-add-cart');
             const msgBox = document.getElementById('validation-msg');
             if (errors.length > 0) {
                 btn.disabled = true;
-                btn.innerText = "Completa las opciones...";
+                btn.innerText = 'Completá las opciones...';
                 msgBox.innerHTML = `⚠️ ${errors[0]}`;
             } else {
                 btn.disabled = false;
-                btn.innerText = "Agregar al Pedido";
-                msgBox.innerText = "";
+                btn.innerText = 'Agregar al Pedido';
+                msgBox.innerText = '';
             }
         }
 
         function addToCart() {
             const baseSelect = document.getElementById('input-base');
-            const temaInputCheck = document.getElementById('input-tema');
-            if (!baseSelect || !baseSelect.value || !temaInputCheck || !temaInputCheck.value) {
+            const temaInput = document.getElementById('input-tema');
+            const shirtChoice = document.querySelector('input[name="shirtPromo"]:checked');
+            const agendaChecked = document.querySelectorAll('#group-agenda input:checked');
+
+            if (!baseSelect?.value || !temaInput?.value || agendaChecked.length === 0 || !shirtChoice) {
                 updateTotal();
                 return;
             }
 
-            let details = [];
-            let total = 0;
-            
-            // Grabar Selects (Excluyendo el tema para darle formato especial)
-            document.querySelectorAll('select').forEach(sel => {
-                if(sel.id === 'input-tema') return; 
+            const details = [];
+            let discountableTotal = 0;
+            let nonDiscountableTotal = 0;
 
-                const name = sel.value;
-                const price = parseInt(sel.options[sel.selectedIndex].dataset.price);
-                if(name) {
-                    details.push(`${name} ($${price})`);
-                    total += price;
+            const basePrice = parseInt(baseSelect.options[baseSelect.selectedIndex]?.dataset.price || 0);
+            details.push(`${baseSelect.value} ($${basePrice.toLocaleString('es-AR')})`);
+            discountableTotal += basePrice;
+            details.push(`Diseño: ${temaInput.value}`);
+
+            agendaChecked.forEach(chk => {
+                const name = chk.dataset.name;
+                if(name === 'Ninguno' || name === 'No agregar') return;
+
+                let price = parseInt(chk.dataset.price || 0);
+                const qtyInput = document.getElementById(`qty-${chk.id}`);
+                if (qtyInput) {
+                    const qty = parseInt(qtyInput.value) || 1;
+                    const itemSubtotal = price * qty;
+                    details.push(`${name} (x${qty}) ($${itemSubtotal.toLocaleString('es-AR')})`);
+                    discountableTotal += itemSubtotal;
+                } else {
+                    details.push(`${name} ($${price.toLocaleString('es-AR')})`);
+                    discountableTotal += price;
                 }
             });
 
-            // Grabar TEMA (Select especial)
-            const temaInput = document.getElementById('input-tema');
-            if (temaInput && temaInput.value) {
-                details.push(`Diseño: ${temaInput.value}`);
+            if (shirtChoice.value === 'yes') {
+                nonDiscountableTotal = SHIRT_PROMO_PRICE;
+                details.push(`Promo remera SIN RECREO ($${SHIRT_PROMO_PRICE.toLocaleString('es-AR')})`);
+                details.push('Modelo, talle y color: a coordinar por WhatsApp');
+                details.push('La remera no participa de descuentos porcentuales');
+            } else {
+                details.push('Remera SIN RECREO: No agregar');
             }
 
-            // Grabar Checkboxes
-            document.querySelectorAll('input[type="checkbox"]:checked').forEach(chk => {
-                const name = chk.dataset.name;
-                if(name !== "Ninguno" && name !== "No agregar") {
-                    let price = parseInt(chk.dataset.price);
-                    const qtyInput = document.getElementById(`qty-${chk.id}`);
-                    if (qtyInput) {
-                        const qty = parseInt(qtyInput.value) || 1;
-                        const subtotal = price * qty;
-                        details.push(`${name} (x${qty}) ($${subtotal})`);
-                        total += subtotal;
-                    } else {
-                        details.push(`${name} ($${price})`);
-                        total += price;
-                    }
-                }
+            const total = discountableTotal + nonDiscountableTotal;
+            cart.push({
+                title: 'Calificador Impreso para Profesores',
+                details,
+                total,
+                discountableTotal,
+                nonDiscountableTotal,
+                includesShirtPromo: shirtChoice.value === 'yes'
             });
-            let title = 'Calificador Impreso para Profesores';
-            cart.push({ title, details, total });
+
             closeConfigModal();
             updateCartBar();
         }
@@ -863,26 +1047,32 @@
             }
         }
 
+        function getCartBreakdown() {
+            const subtotal = cart.reduce((acc, item) => acc + Number(item.total || 0), 0);
+            const discountableSubtotal = cart.reduce((acc, item) => {
+                const value = item.discountableTotal;
+                return acc + (Number.isFinite(Number(value)) ? Number(value) : Number(item.total || 0));
+            }, 0);
+            const nonDiscountableSubtotal = Math.max(0, subtotal - discountableSubtotal);
+            const discountAmount = appliedDiscount.percent > 0
+                ? calculateDiscountAmount(discountableSubtotal, appliedDiscount.percent)
+                : 0;
+            const finalTotal = subtotal - discountAmount;
+
+            return { subtotal, discountableSubtotal, nonDiscountableSubtotal, discountAmount, finalTotal };
+        }
+
         function getCartFinalTotal() {
-            let total = cart.reduce((acc, item) => acc + item.total, 0);
-            if(appliedDiscount.percent > 0) {
-                let discAmount = calculateDiscountAmount(total, appliedDiscount.percent);
-                total = total - discAmount;
-            }
-            return Math.floor(total);
+            return Math.floor(getCartBreakdown().finalTotal);
         }
 
         function renderCartItems() {
             const container = document.getElementById('cart-items-container');
             container.innerHTML = '';
-            
-            let subtotal = cart.reduce((acc, item) => acc + item.total, 0);
-            let discountAmount = 0;
-            let finalTotal = subtotal;
+
+            const { subtotal, discountableSubtotal, nonDiscountableSubtotal, discountAmount, finalTotal } = getCartBreakdown();
 
             if(appliedDiscount.percent > 0) {
-                discountAmount = calculateDiscountAmount(subtotal, appliedDiscount.percent);
-                finalTotal = subtotal - discountAmount;
                 document.getElementById('discount-row').style.display = 'flex';
                 document.getElementById('cart-discount').innerText = `-$${discountAmount.toLocaleString('es-AR')} (${appliedDiscount.percent}%)`;
             } else {
@@ -906,24 +1096,31 @@
                 container.innerHTML = '<div style="text-align:center; color:#999; margin-top:50px; display:flex; flex-direction:column; align-items:center;"><span style="font-size:3rem; margin-bottom:20px;">🛒</span><p>Tu carrito está vacío.</p></div>';
                 document.getElementById('cart-subtotal').innerText = '$0';
                 document.getElementById('cart-final-total').innerText = '$0';
-                document.getElementById('payment-now-row').style.display = 'none';
-                document.getElementById('payment-delivery-row').style.display = 'none';
-                
+                paymentNowRow.style.display = 'none';
+                paymentDeliveryRow.style.display = 'none';
                 const personalData = document.getElementById('personal-data-section');
                 if(personalData) personalData.style.display = 'none';
                 return;
-            } else {
-                const personalData = document.getElementById('personal-data-section');
-                if(personalData) personalData.style.display = 'block';
             }
 
+            const personalData = document.getElementById('personal-data-section');
+            if(personalData) personalData.style.display = 'block';
+
             cart.forEach((item, index) => {
-                let detailsHtml = item.details.map(d => `<div>• ${d}</div>`).join('');
-                container.innerHTML += `<div class="cart-item"><div class="cart-item-title">${item.title}</div><button class="btn-remove" onclick="removeFromCart(${index})">✕</button><div class="cart-item-details">${detailsHtml}</div><div class="cart-item-price">$${item.total.toLocaleString('es-AR')}</div></div>`;
+                const detailsHtml = item.details.map(d => `<div>• ${escapeHtml(d)}</div>`).join('');
+                container.innerHTML += `<div class="cart-item"><div class="cart-item-title">${escapeHtml(item.title)}</div><button class="btn-remove" onclick="removeFromCart(${index})">✕</button><div class="cart-item-details">${detailsHtml}</div><div class="cart-item-price">$${item.total.toLocaleString('es-AR')}</div></div>`;
             });
 
             document.getElementById('cart-subtotal').innerText = `$${subtotal.toLocaleString('es-AR')}`;
             document.getElementById('cart-final-total').innerText = `$${finalTotal.toLocaleString('es-AR')}`;
+
+            if (appliedDiscount.percent > 0 && nonDiscountableSubtotal > 0) {
+                const msg = document.getElementById('coupon-msg');
+                if (msg && appliedDiscount.code) {
+                    msg.innerText = `Código ${appliedDiscount.code} aplicado a la agenda y sus agregados ($${discountableSubtotal.toLocaleString('es-AR')}). La remera no recibe descuento.`;
+                    msg.className = 'success-text';
+                }
+            }
         }
 
         function removeFromCart(index) {
@@ -959,7 +1156,7 @@
                 };
                 msg.innerText = isTwoPayments
                     ? 'Código DOSPAGOS aplicado: abonás 50% ahora y el 50% restante al momento de la entrega.'
-                    : `¡Código ${found.code} aplicado! Tenés ${found.discount}% de descuento sobre el total.`;
+                    : `¡Código ${found.code} aplicado! Tenés ${found.discount}% de descuento sobre la agenda y sus agregados. La remera queda fuera de la promoción.`;
                 msg.className = 'success-text';
             } else {
                 appliedDiscount = { code: '', percent: 0, isTwoPayments: false };
@@ -983,50 +1180,53 @@
             if (!clientName || (!deliveryEnvio.checked && !deliveryPresencial.checked)) {
                 errorMsg.style.display = 'block';
                 return;
-            } else {
-                errorMsg.style.display = 'none';
             }
+            errorMsg.style.display = 'none';
 
-            let text = "Hola Docentes Brown! \nQuiero realizar el siguiente pedido:\n\n";
-
-            text += "+ *MIS DATOS*\n";
+            let text = 'Hola Docentes Brown!\nQuiero realizar el siguiente pedido:\n\n';
+            text += '+ *MIS DATOS*\n';
             text += `Nombre: ${clientName}\n`;
-            
-            const deliveryText = deliveryEnvio.checked
-                ? "Envío por ANDREANI (a cargo del comprador)"
-                : "Entrega Presencial en ISFD 41";
-            text += `Entrega: ${deliveryText}\n`;
-            
-            text += "------------------------------\n\n";
 
-            text += "+ *DETALLE DEL PEDIDO*\n";
-            let subtotal = 0;
-            
+            const deliveryText = deliveryEnvio.checked
+                ? 'Envío por ANDREANI (a cargo del comprador)'
+                : 'Entrega Presencial en ISFD 41';
+            text += `Entrega: ${deliveryText}\n`;
+            text += '------------------------------\n\n';
+
+            text += '+ *DETALLE DEL PEDIDO*\n';
             cart.forEach((item, i) => {
                 text += `*${i+1}. ${item.title}*\n`;
                 item.details.forEach(d => text += `   ${d}\n`);
-                text += `   Precio: $${item.total}\n\n`;
-                subtotal += item.total;
+                text += `   Precio: $${item.total.toLocaleString('es-AR')}\n\n`;
             });
 
+            const breakdown = getCartBreakdown();
+            const hasShirtPromo = cart.some(item => item.includesShirtPromo);
+
             if(appliedDiscount.isTwoPayments) {
-                const payment = calculateTwoPayments(subtotal);
-                text += `Código promocional: *DOSPAGOS*\n`;
-                text += `*TOTAL DEL PEDIDO: $${subtotal.toLocaleString('es-AR')}*\n`;
+                const payment = calculateTwoPayments(breakdown.finalTotal);
+                text += 'Código promocional: *DOSPAGOS*\n';
+                text += `*TOTAL DEL PEDIDO: $${breakdown.finalTotal.toLocaleString('es-AR')}*\n`;
                 text += `*A PAGAR AHORA (50%): $${payment.payNow.toLocaleString('es-AR')}*\n`;
                 text += `Saldo al momento de la entrega: $${payment.payOnDelivery.toLocaleString('es-AR')}`;
             } else if(appliedDiscount.percent > 0) {
-                const discountAmount = calculateDiscountAmount(subtotal, appliedDiscount.percent);
-                const finalTotal = subtotal - discountAmount;
-                text += `Subtotal: $${subtotal.toLocaleString('es-AR')}\n`;
+                text += `Subtotal: $${breakdown.subtotal.toLocaleString('es-AR')}\n`;
                 text += `Código promocional: *${appliedDiscount.code}*\n`;
-                text += `Descuento (${appliedDiscount.percent}%): -$${discountAmount.toLocaleString('es-AR')}\n`;
-                text += `*TOTAL FINAL: $${finalTotal.toLocaleString('es-AR')}*`;
+                text += `Base con descuento (agenda y agregados): $${breakdown.discountableSubtotal.toLocaleString('es-AR')}\n`;
+                if (breakdown.nonDiscountableSubtotal > 0) {
+                    text += `Remera sin descuento: $${breakdown.nonDiscountableSubtotal.toLocaleString('es-AR')}\n`;
+                }
+                text += `Descuento (${appliedDiscount.percent}%): -$${breakdown.discountAmount.toLocaleString('es-AR')}\n`;
+                text += `*TOTAL FINAL: $${breakdown.finalTotal.toLocaleString('es-AR')}*`;
             } else {
-                text += `*TOTAL FINAL: $${subtotal.toLocaleString('es-AR')}*`;
+                text += `*TOTAL FINAL: $${breakdown.finalTotal.toLocaleString('es-AR')}*`;
             }
 
-            text += "\n\nQuedo a la espera para coordinar el pago. Gracias!";
+            if (hasShirtPromo) {
+                text += '\n\n*REMERA SIN RECREO:* modelo, talle y color a coordinar por este medio.';
+            }
+
+            text += '\n\nQuedo a la espera para coordinar el pago. Gracias!';
             window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`, '_blank');
         }
 
