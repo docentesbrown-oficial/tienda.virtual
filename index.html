@@ -375,7 +375,7 @@
 
         // Pegá aquí la misma URL /exec del Web App de Google Apps Script que ya usabas
         // para leer la carpeta de tapas.
-        const COVERS_API_URL = "https://script.google.com/macros/s/AKfycbzjZS1BWh0XBanQGWgGD4EJGbI4MqQwBbeUV60F68p7-2VNd2558gzCec-Vxgwd5saq/exec"";
+        const COVERS_API_URL = "https://script.google.com/macros/s/AKfycbzjZS1BWh0XBanQGWgGD4EJGbI4MqQwBbeUV60F68p7-2VNd2558gzCec-Vxgwd5saq/exec";
 
         let CATALOG = { profesores: [], agregados: [], cupones: [] };
         let cart = [];
@@ -385,7 +385,35 @@
         let coverCatalogError = '';
         let selectedCoverId = '';
 
-        window.onload = async function() {
+        const REQUEST_TIMEOUT_MS = 10000;
+        const PAGE_LOADER_MAX_MS = 2500;
+        let pageStarted = false;
+
+        function hideLoadingScreen() {
+            const loader = document.getElementById('loading-screen');
+            if (!loader || loader.dataset.hidden === 'true') return;
+            loader.dataset.hidden = 'true';
+            loader.style.opacity = '0';
+            setTimeout(() => { loader.style.display = 'none'; }, 450);
+        }
+
+        async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                return await fetch(url, { ...options, signal: controller.signal });
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
+        async function startPage() {
+            if (pageStarted) return;
+            pageStarted = true;
+
+            // La interfaz nunca queda bloqueada esperando Drive o Google Sheets.
+            setTimeout(hideLoadingScreen, PAGE_LOADER_MAX_MS);
+
             try {
                 const [catalogResult, coversResult] = await Promise.allSettled([
                     loadSpreadsheetCatalog(),
@@ -394,23 +422,31 @@
 
                 if (catalogResult.status === 'rejected') {
                     console.error('Error al cargar cursos y agregados:', catalogResult.reason);
-                    alert("No se pudieron cargar los cursos y agregados. Recargá la página.");
                 }
 
                 if (coversResult.status === 'rejected') {
                     console.error('Error al cargar tapas:', coversResult.reason);
                 }
+            } catch (error) {
+                console.error('Error general de inicio:', error);
             } finally {
-                const loader = document.getElementById('loading-screen');
-                loader.style.opacity = '0';
-                setTimeout(() => { loader.style.display = 'none'; }, 500);
+                hideLoadingScreen();
             }
-        };
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startPage, { once: true });
+        } else {
+            startPage();
+        }
 
         async function loadSpreadsheetCatalog() {
-            const res = await fetch(CSV_URL, { cache: 'no-store' });
+            const res = await fetchWithTimeout(CSV_URL, { cache: 'no-store' });
             if (!res.ok) throw new Error(`No se pudo cargar el catálogo (${res.status})`);
             const csv = await res.text();
+            CATALOG.profesores = [];
+            CATALOG.agregados = [];
+            CATALOG.cupones = [];
             parseData(csv);
         }
 
@@ -440,12 +476,12 @@
             coverCatalogError = '';
 
             if (!COVERS_API_URL || COVERS_API_URL.includes('PEGAR_AQUI')) {
-                coverCatalogError = 'Falta conectar la galería con el Web App de Google Drive. Las tapas no se toman de la hoja de cálculo.';
+                coverCatalogError = 'La página abrió correctamente, pero falta configurar la URL /exec del Web App que lee la carpeta de Google Drive. Las tapas no se toman de la hoja.';
                 return;
             }
 
             try {
-                const response = await fetch(COVERS_API_URL, { cache: 'no-store' });
+                const response = await fetchWithTimeout(COVERS_API_URL, { cache: 'no-store' });
                 if (!response.ok) throw new Error(`Respuesta ${response.status}`);
 
                 const payload = await response.json();
@@ -617,7 +653,12 @@
             container.innerHTML = '';
             document.getElementById('modal-title').innerText = 'Calificador para Profesores';
 
-            let html = createSelect("1. Cantidad de Cursos", "base", CATALOG.profesores, "Seleccioná la cantidad de cursos...", "handleCourseSelection()");
+            let html = CATALOG.profesores.length > 0
+                ? createSelect("1. Cantidad de Cursos", "base", CATALOG.profesores, "Seleccioná la cantidad de cursos...", "handleCourseSelection()")
+                : `<div class="form-group">
+                        <div class="section-title">1. Cantidad de Cursos <span style="color:var(--danger-red)">*</span></div>
+                        <div class="empty-options-note">No pudimos cargar los cursos todavía. Cerrá esta ventana y volvé a intentarlo en unos segundos.</div>
+                   </div>`;
 
             html += `<div class="form-group progressive-section" id="cover-section">
                         <div class="section-title">2. Elegí el tema de la portada <span style="color:var(--danger-red)">*</span></div>
@@ -722,6 +763,13 @@
         }
 
         function addToCart() {
+            const baseSelect = document.getElementById('input-base');
+            const temaInputCheck = document.getElementById('input-tema');
+            if (!baseSelect || !baseSelect.value || !temaInputCheck || !temaInputCheck.value) {
+                updateTotal();
+                return;
+            }
+
             let details = [];
             let total = 0;
             
