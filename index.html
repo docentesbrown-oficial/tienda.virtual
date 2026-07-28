@@ -112,7 +112,7 @@
         .cover-option:active { transform: scale(0.98); }
         .cover-option.selected { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(26, 59, 92, 0.12); }
         .cover-image-wrap { position: relative; width: 100%; aspect-ratio: 7 / 10; overflow: hidden; background: #f2f2f7; }
-        .cover-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .cover-image { width: 100%; height: 100%; object-fit: contain; display: block; background: #f7f7f7; }
         .cover-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 14px; text-align: center; color: var(--text-secondary); font-size: 0.85rem; line-height: 1.3; }
         .cover-label { display: block; padding: 11px 10px 12px; color: var(--primary-blue); font-weight: 800; font-size: 0.95rem; line-height: 1.2; text-align: center; }
         .cover-check { position: absolute; top: 9px; right: 9px; width: 28px; height: 28px; border-radius: 50%; background: var(--primary-blue); color: #fff; display: none; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; box-shadow: 0 3px 10px rgba(0,0,0,0.2); }
@@ -368,19 +368,14 @@
         const ADMIN_PASS = "Brown2025";
         const MAX_DISCOUNT_CAP = 3000;
 
-        // Pegá aquí la URL del Web App de Google Apps Script que lista las tapas.
-        // Mientras siga el texto de ejemplo, la tienda mostrará los temas sin imagen como respaldo.
-        const COVERS_API_URL = "PEGAR_AQUI_LA_URL_DEL_WEB_APP";
+        // TAPAS: se obtienen exclusivamente de la carpeta de Google Drive.
+        // No se leen desde la hoja de cálculo ni desde una lista fija dentro del HTML.
+        const COVER_FOLDER_ID = "18h2v0vtZxagwB9WV_eyidSHO9uvh6zDr";
+        const COVER_FOLDER_URL = `https://drive.google.com/drive/folders/${COVER_FOLDER_ID}`;
 
-
-        // LISTA DE TEMAS (Checklist)
-        const COVER_THEMES = [
-            "Artística", "Biología", "Cine", "Contable", "Danza", 
-            "Ed. Física", "Física", "Galeano", "Geografía", "Historia", 
-            "Inglés", "Literatura", "Madres de la Plaza", "Mandalas", 
-            "Matemática", "Mujeres de la Ciencia", "Música", "Ni una Menos", 
-            "Paisajes", "Papa Francisco", "Química", "Retro"
-        ].sort();
+        // Pegá aquí la misma URL /exec del Web App de Google Apps Script que ya usabas
+        // para leer la carpeta de tapas.
+        const COVERS_API_URL = "https://script.google.com/macros/s/AKfycbzjZS1BWh0XBanQGWgGD4EJGbI4MqQwBbeUV60F68p7-2VNd2558gzCec-Vxgwd5saq/exec"";
 
         let CATALOG = { profesores: [], agregados: [], cupones: [] };
         let cart = [];
@@ -392,21 +387,32 @@
 
         window.onload = async function() {
             try {
-                const res = await fetch(CSV_URL);
-                if (!res.ok) throw new Error(`No se pudo cargar el catálogo (${res.status})`);
-                const csv = await res.text();
-                parseData(csv);
-                await loadCoverCatalog();
-            } catch (err) {
-                console.error(err);
-                coverCatalog = buildFallbackCoverCatalog();
-                alert("No se pudo cargar una parte del catálogo. Recargá la página.");
+                const [catalogResult, coversResult] = await Promise.allSettled([
+                    loadSpreadsheetCatalog(),
+                    loadCoverCatalog()
+                ]);
+
+                if (catalogResult.status === 'rejected') {
+                    console.error('Error al cargar cursos y agregados:', catalogResult.reason);
+                    alert("No se pudieron cargar los cursos y agregados. Recargá la página.");
+                }
+
+                if (coversResult.status === 'rejected') {
+                    console.error('Error al cargar tapas:', coversResult.reason);
+                }
             } finally {
                 const loader = document.getElementById('loading-screen');
                 loader.style.opacity = '0';
                 setTimeout(() => { loader.style.display = 'none'; }, 500);
             }
         };
+
+        async function loadSpreadsheetCatalog() {
+            const res = await fetch(CSV_URL, { cache: 'no-store' });
+            if (!res.ok) throw new Error(`No se pudo cargar el catálogo (${res.status})`);
+            const csv = await res.text();
+            parseData(csv);
+        }
 
         function parseData(csv) {
             const rows = csv.split('\n').slice(1);
@@ -429,31 +435,29 @@
         }
 
 
-        function buildFallbackCoverCatalog() {
-            const names = COVER_THEMES;
-            return [...new Set(names.filter(Boolean))]
-                .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))
-                .map((name, index) => ({ id: `fallback-${index}`, name, image: '' }));
-        }
-
         async function loadCoverCatalog() {
+            coverCatalog = [];
             coverCatalogError = '';
 
             if (!COVERS_API_URL || COVERS_API_URL.includes('PEGAR_AQUI')) {
-                coverCatalog = buildFallbackCoverCatalog();
-                coverCatalogError = 'La galería todavía no está conectada con Google Drive. Se muestran los nombres disponibles como respaldo.';
+                coverCatalogError = 'Falta conectar la galería con el Web App de Google Drive. Las tapas no se toman de la hoja de cálculo.';
                 return;
             }
 
             try {
                 const response = await fetch(COVERS_API_URL, { cache: 'no-store' });
                 if (!response.ok) throw new Error(`Respuesta ${response.status}`);
+
                 const payload = await response.json();
+                if (payload && payload.ok === false) {
+                    throw new Error(payload.error || 'El Web App informó un error.');
+                }
+
                 const items = Array.isArray(payload) ? payload : payload.items;
                 if (!Array.isArray(items)) throw new Error('El Web App no devolvió una lista válida.');
 
                 coverCatalog = items
-                    .filter(item => item && item.name)
+                    .filter(item => item && item.name && (item.image || item.thumbnail))
                     .map((item, index) => ({
                         id: String(item.id || `cover-${index}`),
                         name: String(item.name).trim(),
@@ -466,8 +470,8 @@
                 }
             } catch (error) {
                 console.error('Error al cargar tapas desde Drive:', error);
-                coverCatalog = buildFallbackCoverCatalog();
-                coverCatalogError = 'No pudimos cargar las imágenes de las tapas. Podés seguir eligiendo por nombre.';
+                coverCatalog = [];
+                coverCatalogError = 'No pudimos cargar las tapas desde Google Drive. Revisá la publicación del Web App y el acceso a la carpeta.';
             }
         }
 
@@ -497,7 +501,9 @@
 
             if (coverCatalog.length === 0) {
                 gallery.innerHTML = '';
-                status.textContent = 'No hay tapas disponibles por el momento.';
+                if (!status.textContent) {
+                    status.textContent = 'No hay tapas disponibles por el momento.';
+                }
                 status.classList.add('error');
                 return;
             }
@@ -615,7 +621,7 @@
 
             html += `<div class="form-group progressive-section" id="cover-section">
                         <div class="section-title">2. Elegí el tema de la portada <span style="color:var(--danger-red)">*</span></div>
-                        <div class="cover-helper">Tocá una tapa para verla seleccionada.</div>
+                        <div class="cover-helper">Las tapas se cargan desde Google Drive. Tocá una para seleccionarla.</div>
                         <div id="cover-gallery-status" class="cover-gallery-status"></div>
                         <div id="cover-gallery" class="cover-grid"></div>
                         <div id="cover-selected-summary" class="cover-selected-summary"></div>
