@@ -837,14 +837,11 @@
         function handleAgendaSelectionProgress() {
             const shirtSection = document.getElementById('shirt-promo-section');
             const hasAgendaChoice = document.querySelectorAll('#group-agenda input:checked').length > 0;
-            const wasHidden = shirtSection && !shirtSection.classList.contains('show');
 
+            // Habilita la sección siguiente, pero mantiene al cliente en los agregados
+            // para que pueda seleccionar varios antes de avanzar manualmente.
             if (shirtSection) shirtSection.classList.toggle('show', hasAgendaChoice);
             updateTotal();
-
-            if (hasAgendaChoice && wasHidden) {
-                setTimeout(() => shirtSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
-            }
         }
 
         function handleShirtChoice() {
