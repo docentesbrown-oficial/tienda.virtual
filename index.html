@@ -91,7 +91,7 @@
         /* FORMULARIOS */
         .section-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-blue); margin: 25px 0 12px 0; }
         
-        select, input[type="text"], input[type="password"], input[type="number"] { 
+        select, input[type="text"], input[type="tel"], input[type="password"], input[type="number"] { 
             width: 100%; padding: 14px 16px; border: 1px solid #e5e5ea; border-radius: var(--radius-input); 
             font-size: 1.05rem; background-color: #fff; appearance: none; -webkit-appearance: none; 
             color: var(--text-main); outline: none; font-family: var(--font-main);
@@ -282,21 +282,26 @@
                 <h3 style="font-size: 1.1rem; color: var(--primary-blue); margin-bottom: 15px;">Tus Datos</h3>
                 
                 <div class="cart-data-input">
-                    <input type="text" id="client-name" placeholder="Nombre Completo *" autocomplete="name">
+                    <input type="text" id="client-name" placeholder="Nombre Completo *" autocomplete="name" oninput="invalidateCheckoutOrder()">
+                </div>
+
+                <div class="cart-data-input">
+                    <input type="tel" id="client-phone" placeholder="Número de celular *" autocomplete="tel" inputmode="tel" oninput="invalidateCheckoutOrder()">
+                    <div style="margin-top:4px; font-size:0.8rem; color:var(--text-secondary); margin-left:5px;">Lo usamos para identificar y coordinar tu pedido.</div>
                 </div>
 
                 <div class="cart-data-input" style="margin-top: 20px;">
                     <label class="cart-data-label">Método de entrega *</label>
                     <div class="delivery-options">
                         <label class="radio-item">
-                            <input type="radio" name="deliveryMethod" value="andreani" id="del-envio">
+                            <input type="radio" name="deliveryMethod" value="andreani" id="del-envio" onchange="invalidateCheckoutOrder()">
                             <div class="radio-content">
                                 <span class="radio-title">Envío por ANDREANI</span>
                                 <span class="radio-desc">A cargo del comprador</span>
                             </div>
                         </label>
                         <label class="radio-item">
-                            <input type="radio" name="deliveryMethod" value="isfd41" id="del-presencial">
+                            <input type="radio" name="deliveryMethod" value="isfd41" id="del-presencial" onchange="invalidateCheckoutOrder()">
                             <div class="radio-content">
                                 <span class="radio-title">Entrega Presencial en ISFD 41</span>
                                 <span class="radio-desc">Coordinaremos día y horario de entrega</span>
@@ -305,13 +310,13 @@
                     </div>
                 </div>
 
-                <div id="data-error-msg" style="color: var(--danger-red); font-weight:600; font-size: 0.9rem; margin-top: 15px; display: none;">⚠️ Ingresá tu nombre completo y elegí el método de entrega.</div>
+                <div id="data-error-msg" style="color: var(--danger-red); font-weight:600; font-size: 0.9rem; margin-top: 15px; display: none;">⚠️ Ingresá tu nombre completo, un número de celular válido y elegí el método de entrega.</div>
             </div>
 
             <div class="coupon-section">
                 <label for="coupon-code-input" style="font-weight:600; color:var(--primary-blue); font-size:0.9rem;">Código promocional</label>
                 <div class="coupon-input-group">
-                    <select id="coupon-code-input" onchange="applyCoupon()" aria-label="Seleccionar código promocional">
+                    <select id="coupon-code-input" onchange="invalidateCheckoutOrder(); applyCoupon()" aria-label="Seleccionar código promocional">
                         <option value="">Sin código promocional</option>
                     </select>
                 </div>
@@ -339,7 +344,7 @@
                     <span style="font-weight:600; font-size:0.95rem; color:var(--text-secondary);">Saldo al momento de la entrega:</span>
                     <span id="payment-delivery-amount" style="font-weight:700; font-size:1.05rem; color:var(--text-main);">$0</span>
                 </div>
-                <button class="btn-whatsapp" onclick="sendToWhatsApp()">Confirmar por WhatsApp</button>
+                <button class="btn-whatsapp" id="btn-confirm-order" onclick="sendToWhatsApp()">Confirmar por WhatsApp</button>
             </div>
         </div>
     </div>
@@ -400,6 +405,10 @@
         // para leer la carpeta de tapas.
         const COVERS_API_URL = "https://script.google.com/macros/s/AKfycbzjZS1BWh0XBanQGWgGD4EJGbI4MqQwBbeUV60F68p7-2VNd2558gzCec-Vxgwd5saq/exec";
 
+        // El mismo Web App registra cada pedido en la base de Google Sheets “Pedidos”.
+        // Al actualizar Code.gs, hay que publicar una nueva versión de la implementación.
+        const PEDIDOS_API_URL = COVERS_API_URL;
+
         // REMERAS SIN RECREO: los modelos se obtienen desde la carpeta de Drive.
         // El cliente elige el modelo en la app; talle y color se coordinan luego por WhatsApp.
         const SHIRT_FOLDER_ID = "1mjLOqhA80otwFtAXS3HOeMHwOSYE0fn5";
@@ -417,6 +426,8 @@
         let shirtCatalogError = '';
         let selectedShirtId = '';
         let selectedShirtName = '';
+        let currentCheckoutOrderId = '';
+        let orderSubmissionLocked = false;
 
         const REQUEST_TIMEOUT_MS = 10000;
         const PAGE_LOADER_MAX_MS = 2500;
@@ -437,6 +448,83 @@
                 return await fetch(url, { ...options, signal: controller.signal });
             } finally {
                 clearTimeout(timeoutId);
+            }
+        }
+
+        function invalidateCheckoutOrder() {
+            currentCheckoutOrderId = '';
+            orderSubmissionLocked = false;
+
+            const button = document.getElementById('btn-confirm-order');
+            if (button) {
+                button.disabled = false;
+                button.innerText = 'Confirmar por WhatsApp';
+            }
+        }
+
+        function getCheckoutOrderId() {
+            if (currentCheckoutOrderId) return currentCheckoutOrderId;
+
+            const now = new Date();
+            const stamp = [
+                now.getFullYear(),
+                String(now.getMonth() + 1).padStart(2, '0'),
+                String(now.getDate()).padStart(2, '0'),
+                String(now.getHours()).padStart(2, '0'),
+                String(now.getMinutes()).padStart(2, '0'),
+                String(now.getSeconds()).padStart(2, '0')
+            ].join('');
+            const random = Math.random().toString(36).slice(2, 7).toUpperCase();
+            currentCheckoutOrderId = `DB-${stamp}-${random}`;
+            return currentCheckoutOrderId;
+        }
+
+        function normalizePhone(value) {
+            return String(value || '').replace(/[^0-9]/g, '');
+        }
+
+        function queueOrderSave(payload) {
+            const encoded = new URLSearchParams({ payload: JSON.stringify(payload) });
+
+            try {
+                if (navigator.sendBeacon && navigator.sendBeacon(PEDIDOS_API_URL, encoded)) {
+                    return true;
+                }
+            } catch (error) {
+                console.warn('sendBeacon no pudo enviar el pedido:', error);
+            }
+
+            // Respaldo compatible con páginas alojadas en dominios distintos a Apps Script.
+            // El formulario se envía a un iframe oculto para evitar bloqueos CORS.
+            try {
+                const frameName = `pedido-frame-${Date.now()}`;
+                const iframe = document.createElement('iframe');
+                iframe.name = frameName;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = PEDIDOS_API_URL;
+                form.target = frameName;
+                form.style.display = 'none';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'payload';
+                input.value = JSON.stringify(payload);
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+
+                setTimeout(() => {
+                    form.remove();
+                    iframe.remove();
+                }, 15000);
+                return true;
+            } catch (error) {
+                console.error('No se pudo enviar el pedido a la base:', error);
+                return false;
             }
         }
 
@@ -1012,6 +1100,7 @@
             }
 
             const details = [];
+            const selectedAddons = [];
             let discountableTotal = 0;
             let nonDiscountableTotal = 0;
 
@@ -1030,9 +1119,11 @@
                     const qty = parseInt(qtyInput.value) || 1;
                     const itemSubtotal = price * qty;
                     details.push(`${name} (x${qty}) ($${itemSubtotal.toLocaleString('es-AR')})`);
+                    selectedAddons.push({ name, quantity: qty, unitPrice: price, subtotal: itemSubtotal });
                     discountableTotal += itemSubtotal;
                 } else {
                     details.push(`${name} ($${price.toLocaleString('es-AR')})`);
+                    selectedAddons.push({ name, quantity: 1, unitPrice: price, subtotal: price });
                     discountableTotal += price;
                 }
             });
@@ -1055,9 +1146,14 @@
                 discountableTotal,
                 nonDiscountableTotal,
                 includesShirtPromo: shirtChoice.value === 'yes',
-                shirtModel: shirtChoice.value === 'yes' ? selectedShirtName : ''
+                shirtModel: shirtChoice.value === 'yes' ? selectedShirtName : '',
+                courseOption: baseSelect.value,
+                coursePrice: basePrice,
+                coverName: temaInput.value,
+                addons: selectedAddons
             });
 
+            invalidateCheckoutOrder();
             closeConfigModal();
             updateCartBar();
         }
@@ -1165,6 +1261,7 @@
 
         function removeFromCart(index) {
             cart.splice(index, 1);
+            invalidateCheckoutOrder();
             if(cart.length === 0) appliedDiscount = { code: '', percent: 0, isTwoPayments: false }; 
             renderCartItems();
             updateCartBar();
@@ -1172,6 +1269,7 @@
         }
 
         function applyCoupon() {
+            invalidateCheckoutOrder();
             const select = document.getElementById('coupon-code-input');
             const code = (select?.value || '').toUpperCase().trim();
             const msg = document.getElementById('coupon-msg');
@@ -1210,26 +1308,32 @@
         }
 
         function sendToWhatsApp() {
-            if (cart.length === 0) return;
+            if (cart.length === 0 || orderSubmissionLocked) return;
 
             const clientName = document.getElementById('client-name').value.trim();
+            const clientPhoneRaw = document.getElementById('client-phone').value.trim();
+            const clientPhoneDigits = normalizePhone(clientPhoneRaw);
             const deliveryEnvio = document.getElementById('del-envio');
             const deliveryPresencial = document.getElementById('del-presencial');
             const errorMsg = document.getElementById('data-error-msg');
 
-            if (!clientName || (!deliveryEnvio.checked && !deliveryPresencial.checked)) {
+            if (!clientName || clientPhoneDigits.length < 8 || (!deliveryEnvio.checked && !deliveryPresencial.checked)) {
                 errorMsg.style.display = 'block';
                 return;
             }
             errorMsg.style.display = 'none';
 
-            let text = 'Hola Docentes Brown!\nQuiero realizar el siguiente pedido:\n\n';
-            text += '+ *MIS DATOS*\n';
-            text += `Nombre: ${clientName}\n`;
-
+            const orderId = getCheckoutOrderId();
+            const deliveryCode = deliveryEnvio.checked ? 'andreani' : 'isfd41';
             const deliveryText = deliveryEnvio.checked
                 ? 'Envío por ANDREANI (a cargo del comprador)'
                 : 'Entrega Presencial en ISFD 41';
+
+            let text = 'Hola Docentes Brown!\nQuiero realizar el siguiente pedido:\n\n';
+            text += `Pedido: *${orderId}*\n\n`;
+            text += '+ *MIS DATOS*\n';
+            text += `Nombre: ${clientName}\n`;
+            text += `Celular: ${clientPhoneRaw}\n`;
             text += `Entrega: ${deliveryText}\n`;
             text += '------------------------------\n\n';
 
@@ -1242,9 +1346,11 @@
 
             const breakdown = getCartBreakdown();
             const hasShirtPromo = cart.some(item => item.includesShirtPromo);
+            const payment = appliedDiscount.isTwoPayments
+                ? calculateTwoPayments(breakdown.finalTotal)
+                : { payNow: breakdown.finalTotal, payOnDelivery: 0 };
 
             if(appliedDiscount.isTwoPayments) {
-                const payment = calculateTwoPayments(breakdown.finalTotal);
                 text += 'Código promocional: *DOSPAGOS*\n';
                 text += `*TOTAL DEL PEDIDO: $${breakdown.finalTotal.toLocaleString('es-AR')}*\n`;
                 text += `*A PAGAR AHORA (50%): $${payment.payNow.toLocaleString('es-AR')}*\n`;
@@ -1259,6 +1365,7 @@
                 text += `Descuento (${appliedDiscount.percent}%): -$${breakdown.discountAmount.toLocaleString('es-AR')}\n`;
                 text += `*TOTAL FINAL: $${breakdown.finalTotal.toLocaleString('es-AR')}*`;
             } else {
+                text += `Código promocional: *Sin código*\n`;
                 text += `*TOTAL FINAL: $${breakdown.finalTotal.toLocaleString('es-AR')}*`;
             }
 
@@ -1270,6 +1377,63 @@
             }
 
             text += '\n\nQuedo a la espera para coordinar el pago. Gracias!';
+
+            const orderPayload = {
+                orderId,
+                createdAtClient: new Date().toISOString(),
+                sourceUrl: window.location.href,
+                customer: {
+                    fullName: clientName,
+                    phone: clientPhoneRaw,
+                    phoneDigits: clientPhoneDigits
+                },
+                delivery: {
+                    code: deliveryCode,
+                    label: deliveryText
+                },
+                coupon: {
+                    code: appliedDiscount.code || '',
+                    percent: Number(appliedDiscount.percent || 0),
+                    isTwoPayments: Boolean(appliedDiscount.isTwoPayments)
+                },
+                totals: {
+                    subtotal: breakdown.subtotal,
+                    discountableSubtotal: breakdown.discountableSubtotal,
+                    nonDiscountableSubtotal: breakdown.nonDiscountableSubtotal,
+                    discountAmount: breakdown.discountAmount,
+                    finalTotal: breakdown.finalTotal,
+                    payNow: payment.payNow,
+                    payOnDelivery: payment.payOnDelivery
+                },
+                items: cart.map(item => ({
+                    title: item.title,
+                    details: Array.isArray(item.details) ? item.details : [],
+                    total: Number(item.total || 0),
+                    discountableTotal: Number(item.discountableTotal || 0),
+                    nonDiscountableTotal: Number(item.nonDiscountableTotal || 0),
+                    courseOption: item.courseOption || '',
+                    coursePrice: Number(item.coursePrice || 0),
+                    coverName: item.coverName || '',
+                    addons: Array.isArray(item.addons) ? item.addons : [],
+                    includesShirtPromo: Boolean(item.includesShirtPromo),
+                    shirtModel: item.shirtModel || ''
+                })),
+                whatsappMessage: text
+            };
+
+            const saveQueued = queueOrderSave(orderPayload);
+            if (!saveQueued) {
+                alert('No pudimos registrar el pedido en la base. Revisá tu conexión e intentá nuevamente.');
+                return;
+            }
+
+            orderSubmissionLocked = true;
+            const button = document.getElementById('btn-confirm-order');
+            if (button) {
+                button.disabled = true;
+                button.innerText = 'Pedido registrado · Abriendo WhatsApp...';
+            }
+
             window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`, '_blank');
         }
 
