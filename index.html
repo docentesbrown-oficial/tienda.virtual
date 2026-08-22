@@ -158,6 +158,28 @@
         .shirt-label { display: block; padding: 9px 8px 10px; text-align: center; font-size: 0.79rem; font-weight: 800; line-height: 1.2; }
         @media (min-width: 520px) { .shirt-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
+        /* LIBRERÍA DOCENTE */
+        .stationery-intro { margin: -2px 0 14px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4; }
+        .stationery-list { display: flex; flex-direction: column; gap: 12px; }
+        .stationery-card { border: 1px solid #e5e5ea; border-radius: 16px; background: #fff; overflow: hidden; transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+        .stationery-card.selected { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(26,59,92,0.08); }
+        .stationery-select { display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 12px; align-items: start; padding: 15px; cursor: pointer; }
+        .stationery-select input[type="checkbox"] { margin-top: 2px; }
+        .stationery-main { min-width: 0; }
+        .stationery-name { display: block; color: var(--primary-blue); font-weight: 800; font-size: 1rem; margin-bottom: 4px; }
+        .stationery-description { display: block; color: var(--text-secondary); font-size: 0.84rem; line-height: 1.4; }
+        .stationery-price { color: var(--text-main); font-weight: 800; font-size: 0.95rem; white-space: nowrap; }
+        .stationery-extra { display: none; padding: 13px 15px 15px 51px; border-top: 1px solid #eef0f2; background: #fafafa; }
+        .stationery-extra.show { display: block; animation: fadeIn 0.2s ease; }
+        .stationery-qty-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+        .stationery-qty-row label { color: var(--text-secondary); font-size: 0.86rem; font-weight: 600; }
+        .stationery-qty { width: 78px !important; padding: 9px 10px !important; text-align: center; font-weight: 700; }
+        .kit-base-choice { margin-top: 13px; padding-top: 13px; border-top: 1px dashed #d6d6da; }
+        .kit-base-title { display: block; color: var(--primary-blue); font-weight: 800; font-size: 0.88rem; margin-bottom: 8px; }
+        .kit-base-option { display: flex; align-items: flex-start; gap: 9px; padding: 9px 0; color: var(--text-main); font-size: 0.85rem; line-height: 1.35; cursor: pointer; }
+        .kit-base-option input[type="radio"] { width: 18px; height: 18px; margin: 0; accent-color: var(--primary-blue); flex-shrink: 0; }
+        .stationery-note { margin-top: 12px; padding: 11px 12px; border-radius: 12px; background: #eef6fc; color: var(--primary-blue); font-size: 0.82rem; line-height: 1.4; }
+
         /* CHECKBOXES */
         .checkbox-list { display: flex; flex-direction: column; border-radius: var(--radius-input); overflow: hidden; border: 1px solid #e5e5ea; }
         .checkbox-item-wrapper { display: flex; flex-direction: column; background: #fff; border-bottom: 1px solid #e5e5ea; }
@@ -393,7 +415,7 @@
 
     <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXegIgxvYuUiHgQBgJIvIexndD6QYUi-UKz0lGem04RYDLkOo3OmdXNME1e63A3g/pub?gid=885679872&single=true&output=csv";
-        const WA_NUMBER = "5491153196358";
+        const WA_NUMBER = "5491135585647";
         const ADMIN_PASS = "Brown2025";
         
         // TAPAS: se obtienen exclusivamente de la carpeta de Google Drive.
@@ -414,6 +436,26 @@
         const SHIRT_FOLDER_ID = "1mjLOqhA80otwFtAXS3HOeMHwOSYE0fn5";
         const SHIRTS_API_URL = `${COVERS_API_URL}?type=shirts`;
         const SHIRT_PROMO_PRICE = 20000;
+
+        const STATIONERY_PRODUCTS = [
+            { id: 'pack-1', name: 'Pack 1', price: 5000, description: '10 tizas blancas + 10 tizas color surtido, marca GIOTTO hipoalergénicas.' },
+            { id: 'pack-2', name: 'Pack 2', price: 5800, description: '3 marcadores para pizarra: 1 negro, 1 rojo y 1 azul.' },
+            { id: 'pack-3', name: 'Pack 3', price: 3300, description: '5 lapiceras azules, marca Filgo.' },
+            { id: 'pack-4', name: 'Pack 4', price: 3300, description: '3 lapiceras azules Filgo + 1 corrector de tinta Filgo.' },
+            { id: 'pack-5', name: 'Pack 5', price: 10000, description: '4 lapiceras azules Filgo + 2 lapiceras rojas Bic + 2 lapiceras verdes Bic + 1 corrector de tinta Filgo.' },
+            { id: 'pack-6', name: 'Pack 6', price: 2000, description: '2 lápices negros Filgo + 1 goma de borrar + 1 sacapuntas.' },
+            { id: 'pack-7', name: 'Pack 7', price: 4600, description: '3 resaltadores Filgo: 1 amarillo, 1 naranja y 1 verde.' },
+            {
+                id: 'kit-docentes-2026',
+                name: 'Kit Docentes 2026',
+                price: 30000,
+                description: '20 tizas blancas y color surtido Giotto hipoalergénicas ó 3 marcadores de pizarra (1 negro, 1 rojo y 1 azul) + 5 lapiceras azules Filgo + 2 lapiceras rojas Bic + 2 lapiceras verdes Bic + 2 lapiceras negras Bic + 1 corrector de tinta Filgo + 2 lápices negros Filgo + 1 goma de borrar + 1 sacapuntas + 3 resaltadores Filgo (1 amarillo, 1 naranja y 1 verde) + 1 regla de 15 cm + 1 pack de notas adhesivas “post it”.',
+                kitBaseOptions: [
+                    '20 tizas blancas y color surtido Giotto hipoalergénicas',
+                    '3 marcadores de pizarra: 1 negro, 1 rojo y 1 azul'
+                ]
+            }
+        ];
 
         let CATALOG = { profesores: [], agregados: [], cupones: [] };
         let cart = [];
@@ -831,6 +873,9 @@
                 summary.classList.add('show');
             }
 
+            const stationerySection = document.getElementById('stationery-section');
+            if (stationerySection) stationerySection.classList.add('show');
+
             updateTotal();
         }
 
@@ -847,6 +892,7 @@
         function handleShirtChoice() {
             const selected = document.querySelector('input[name="shirtPromo"]:checked');
             const summary = document.getElementById('shirt-choice-summary');
+            const stationerySection = document.getElementById('stationery-section');
 
             if (selected?.value === 'no') {
                 selectedShirtId = '';
@@ -864,6 +910,7 @@
                 }
                 summary.classList.add('show');
             }
+            if (stationerySection) stationerySection.classList.toggle('show', Boolean(selected));
             updateTotal();
         }
 
@@ -995,9 +1042,80 @@
                         </div>
                      </div>`;
 
+            html += `<div class="form-group progressive-section" id="stationery-section">
+                        <div class="section-title">5. Librería docente</div>
+                        <p class="stationery-intro">Sumá uno o varios packs de librería a tu pedido. Esta sección es opcional y los productos de librería no participan de descuentos porcentuales.</p>
+                        ${createStationeryMarkup()}
+                        <div class="stationery-note">Podés elegir más de un pack y también indicar varias unidades de cada uno.</div>
+                     </div>`;
+
             container.innerHTML = html;
             renderCoverGallery();
             renderShirtGallery();
+        }
+
+        function createStationeryMarkup() {
+            return `<div class="stationery-list">${STATIONERY_PRODUCTS.map((item, index) => {
+                const kitOptions = Array.isArray(item.kitBaseOptions)
+                    ? `<div class="kit-base-choice">
+                            <span class="kit-base-title">Elegí la variante del kit:</span>
+                            ${item.kitBaseOptions.map((option, optionIndex) => `
+                                <label class="kit-base-option">
+                                    <input type="radio" name="kitStationeryBase" value="${escapeHtml(option)}" onchange="updateTotal()">
+                                    <span>${escapeHtml(option)}</span>
+                                </label>`).join('')}
+                       </div>`
+                    : '';
+
+                return `<div class="stationery-card" id="stationery-card-${index}">
+                            <label class="stationery-select" for="stationery-${index}">
+                                <input type="checkbox" id="stationery-${index}" data-index="${index}" onchange="handleStationeryToggle(this)">
+                                <span class="stationery-main">
+                                    <span class="stationery-name">${escapeHtml(item.name)}</span>
+                                    <span class="stationery-description">${escapeHtml(item.description)}</span>
+                                </span>
+                                <span class="stationery-price">$${item.price.toLocaleString('es-AR')}</span>
+                            </label>
+                            <div class="stationery-extra" id="stationery-extra-${index}">
+                                <div class="stationery-qty-row">
+                                    <label for="stationery-qty-${index}">Cantidad</label>
+                                    <input class="stationery-qty" type="number" id="stationery-qty-${index}" min="1" value="1" inputmode="numeric" oninput="updateTotal()">
+                                </div>
+                                ${kitOptions}
+                            </div>
+                        </div>`;
+            }).join('')}</div>`;
+        }
+
+        function handleStationeryToggle(checkbox) {
+            const index = checkbox.dataset.index;
+            const extra = document.getElementById(`stationery-extra-${index}`);
+            const card = document.getElementById(`stationery-card-${index}`);
+            if (extra) extra.classList.toggle('show', checkbox.checked);
+            if (card) card.classList.toggle('selected', checkbox.checked);
+            updateTotal();
+        }
+
+        function getSelectedStationery() {
+            return Array.from(document.querySelectorAll('#stationery-section input[type="checkbox"]:checked')).map(checkbox => {
+                const index = Number(checkbox.dataset.index);
+                const product = STATIONERY_PRODUCTS[index];
+                const qtyInput = document.getElementById(`stationery-qty-${index}`);
+                const quantity = Math.max(1, parseInt(qtyInput?.value || '1', 10) || 1);
+                const kitBase = Array.isArray(product?.kitBaseOptions)
+                    ? (document.querySelector('input[name="kitStationeryBase"]:checked')?.value || '')
+                    : '';
+
+                return {
+                    id: product.id,
+                    name: product.name,
+                    description: product.description,
+                    quantity,
+                    unitPrice: product.price,
+                    subtotal: product.price * quantity,
+                    kitBase
+                };
+            });
         }
 
         function createSelect(label, id, items, defaultText = "Seleccionar opción...", onChange = "updateTotal()") {
@@ -1071,6 +1189,11 @@
             if (shirtChoice?.value === 'yes' && !selectedShirtName) errors.push('Elegí un modelo de remera');
             if (shirtChoice?.value === 'yes') total += SHIRT_PROMO_PRICE;
 
+            const stationery = getSelectedStationery();
+            stationery.forEach(item => total += item.subtotal);
+            const kitWithoutVariant = stationery.find(item => item.id === 'kit-docentes-2026' && !item.kitBase);
+            if (kitWithoutVariant) errors.push('Elegí tizas o marcadores para el Kit Docentes 2026');
+
             document.getElementById('modal-price').innerText = `$${total.toLocaleString('es-AR')}`;
             const btn = document.getElementById('btn-add-cart');
             const msgBox = document.getElementById('validation-msg');
@@ -1090,8 +1213,10 @@
             const temaInput = document.getElementById('input-tema');
             const shirtChoice = document.querySelector('input[name="shirtPromo"]:checked');
             const agendaChecked = document.querySelectorAll('#group-agenda input:checked');
+            const selectedStationery = getSelectedStationery();
+            const kitWithoutVariant = selectedStationery.find(item => item.id === 'kit-docentes-2026' && !item.kitBase);
 
-            if (!baseSelect?.value || !temaInput?.value || agendaChecked.length === 0 || !shirtChoice || (shirtChoice.value === 'yes' && !selectedShirtName)) {
+            if (!baseSelect?.value || !temaInput?.value || agendaChecked.length === 0 || !shirtChoice || (shirtChoice.value === 'yes' && !selectedShirtName) || kitWithoutVariant) {
                 updateTotal();
                 return;
             }
@@ -1100,6 +1225,7 @@
             const selectedAddons = [];
             let discountableTotal = 0;
             let nonDiscountableTotal = 0;
+            let stationeryTotal = 0;
 
             const basePrice = parseInt(baseSelect.options[baseSelect.selectedIndex]?.dataset.price || 0);
             details.push(`${baseSelect.value} ($${basePrice.toLocaleString('es-AR')})`);
@@ -1135,7 +1261,19 @@
                 details.push('Remera SIN RECREO: No agregar');
             }
 
-            const total = discountableTotal + nonDiscountableTotal;
+            if (selectedStationery.length > 0) {
+                details.push('— Librería docente —');
+                selectedStationery.forEach(item => {
+                    stationeryTotal += item.subtotal;
+                    details.push(`${item.name}${item.quantity > 1 ? ` (x${item.quantity})` : ''} ($${item.subtotal.toLocaleString('es-AR')})`);
+                    if (item.kitBase) details.push(`Kit Docentes 2026 · Variante: ${item.kitBase}`);
+                });
+                details.push('Los productos de librería no participan de descuentos porcentuales');
+            } else {
+                details.push('Librería docente: No agregar');
+            }
+
+            const total = discountableTotal + nonDiscountableTotal + stationeryTotal;
             cart.push({
                 title: 'Calificador Impreso para Profesores',
                 details,
@@ -1144,6 +1282,9 @@
                 nonDiscountableTotal,
                 includesShirtPromo: shirtChoice.value === 'yes',
                 shirtModel: shirtChoice.value === 'yes' ? selectedShirtName : '',
+                shirtPrice: shirtChoice.value === 'yes' ? SHIRT_PROMO_PRICE : 0,
+                stationery: selectedStationery,
+                stationeryTotal,
                 courseOption: baseSelect.value,
                 coursePrice: basePrice,
                 coverName: temaInput.value,
@@ -1186,13 +1327,15 @@
                 const value = item.discountableTotal;
                 return acc + (Number.isFinite(Number(value)) ? Number(value) : Number(item.total || 0));
             }, 0);
+            const shirtSubtotal = cart.reduce((acc, item) => acc + Number(item.shirtPrice || 0), 0);
+            const stationerySubtotal = cart.reduce((acc, item) => acc + Number(item.stationeryTotal || 0), 0);
             const nonDiscountableSubtotal = Math.max(0, subtotal - discountableSubtotal);
             const discountAmount = appliedDiscount.percent > 0
                 ? calculateDiscountAmount(discountableSubtotal, appliedDiscount.percent)
                 : 0;
             const finalTotal = subtotal - discountAmount;
 
-            return { subtotal, discountableSubtotal, nonDiscountableSubtotal, discountAmount, finalTotal };
+            return { subtotal, discountableSubtotal, nonDiscountableSubtotal, shirtSubtotal, stationerySubtotal, discountAmount, finalTotal };
         }
 
         function getCartFinalTotal() {
@@ -1250,7 +1393,7 @@
             if (appliedDiscount.percent > 0 && nonDiscountableSubtotal > 0) {
                 const msg = document.getElementById('coupon-msg');
                 if (msg && appliedDiscount.code) {
-                    msg.innerText = `Código ${appliedDiscount.code} aplicado a la agenda y sus agregados ($${discountableSubtotal.toLocaleString('es-AR')}). La remera no recibe descuento.`;
+                    msg.innerText = `Código ${appliedDiscount.code} aplicado a la agenda y sus agregados ($${discountableSubtotal.toLocaleString('es-AR')}). La remera y la librería no reciben descuento.`;
                     msg.className = 'success-text';
                 }
             }
@@ -1291,7 +1434,7 @@
                 };
                 msg.innerText = isTwoPayments
                     ? 'Código DOSPAGOS aplicado: abonás 50% ahora y el 50% restante al momento de la entrega.'
-                    : `¡Código ${found.code} aplicado! Tenés ${found.discount}% de descuento sobre la agenda y sus agregados. La remera queda fuera de la promoción.`;
+                    : `¡Código ${found.code} aplicado! Tenés ${found.discount}% de descuento sobre la agenda y sus agregados. La remera y la librería quedan fuera de la promoción.`;
                 msg.className = 'success-text';
             } else {
                 appliedDiscount = { code: '', percent: 0, isTwoPayments: false };
@@ -1356,8 +1499,11 @@
                 text += `Subtotal: $${breakdown.subtotal.toLocaleString('es-AR')}\n`;
                 text += `Código promocional: *${appliedDiscount.code}*\n`;
                 text += `Base con descuento (agenda y agregados): $${breakdown.discountableSubtotal.toLocaleString('es-AR')}\n`;
-                if (breakdown.nonDiscountableSubtotal > 0) {
-                    text += `Remera sin descuento: $${breakdown.nonDiscountableSubtotal.toLocaleString('es-AR')}\n`;
+                if (breakdown.shirtSubtotal > 0) {
+                    text += `Remera sin descuento: $${breakdown.shirtSubtotal.toLocaleString('es-AR')}\n`;
+                }
+                if (breakdown.stationerySubtotal > 0) {
+                    text += `Librería sin descuento: $${breakdown.stationerySubtotal.toLocaleString('es-AR')}\n`;
                 }
                 text += `Descuento (${appliedDiscount.percent}%): -$${breakdown.discountAmount.toLocaleString('es-AR')}\n`;
                 text += `*TOTAL FINAL: $${breakdown.finalTotal.toLocaleString('es-AR')}*`;
@@ -1397,6 +1543,8 @@
                     subtotal: breakdown.subtotal,
                     discountableSubtotal: breakdown.discountableSubtotal,
                     nonDiscountableSubtotal: breakdown.nonDiscountableSubtotal,
+                    shirtSubtotal: breakdown.shirtSubtotal,
+                    stationerySubtotal: breakdown.stationerySubtotal,
                     discountAmount: breakdown.discountAmount,
                     finalTotal: breakdown.finalTotal,
                     payNow: payment.payNow,
@@ -1413,7 +1561,10 @@
                     coverName: item.coverName || '',
                     addons: Array.isArray(item.addons) ? item.addons : [],
                     includesShirtPromo: Boolean(item.includesShirtPromo),
-                    shirtModel: item.shirtModel || ''
+                    shirtModel: item.shirtModel || '',
+                    shirtPrice: Number(item.shirtPrice || 0),
+                    stationery: Array.isArray(item.stationery) ? item.stationery : [],
+                    stationeryTotal: Number(item.stationeryTotal || 0)
                 })),
                 whatsappMessage: text
             };

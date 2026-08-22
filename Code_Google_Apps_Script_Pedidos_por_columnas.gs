@@ -225,7 +225,7 @@ function buildOrderRow_(payload) {
     number_(coupon.percent, 0),
     paymentType,
     number_(totals.discountableSubtotal, 0),
-    number_(totals.nonDiscountableSubtotal, 0),
+    number_(totals.shirtSubtotal, totals.nonDiscountableSubtotal),
     number_(totals.subtotal, 0),
     number_(totals.discountAmount, 0),
     number_(totals.finalTotal, 0),
