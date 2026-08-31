@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Paleta de Colores */
             --primary-blue: #1A3B5C;
             --bg-brand: #f3efdc; 
             --card-bg: #FFFFFF;
@@ -18,91 +17,51 @@
             --accent-green: #34C759;
             --danger-red: #FF3B30;
             --separator: #c6c6c8;
-            
-            /* Estilo iOS */
             --radius-card: 22px;
             --radius-input: 12px;
             --shadow-ios: 0 4px 20px rgba(0,0,0,0.08);
-            
             --font-brand: 'League Spartan', sans-serif;
             --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            margin: 0; padding: 0; font-family: var(--font-main); 
-            background-color: var(--bg-brand); color: var(--text-main); 
-            padding-bottom: 140px; -webkit-font-smoothing: antialiased;
-        }
+        body { margin: 0; padding: 0; font-family: var(--font-main); background-color: var(--bg-brand); color: var(--text-main); padding-bottom: 140px; -webkit-font-smoothing: antialiased; }
 
-        /* LOADING */
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-brand); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
         .spinner { width: 40px; height: 40px; border: 4px solid rgba(26, 59, 92, 0.2); border-top: 4px solid var(--primary-blue); border-radius: 50%; animation: spin 0.8s ease-in-out infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* HEADER */
         header { background-color: var(--primary-blue); padding: 20px 20px 25px 20px; text-align: center; position: sticky; top: 0; z-index: 100; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         header h1 { color: white; margin: 0; font-family: var(--font-brand); text-transform: uppercase; letter-spacing: 1px; font-size: 1.6rem; }
         header p { color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.95rem; }
 
         .container { padding: 25px 20px; max-width: 600px; margin: 0 auto; }
 
-        /* TARJETAS */
-        .product-card { 
-            background: var(--card-bg); border-radius: var(--radius-card); padding: 22px; 
-            margin-bottom: 20px; box-shadow: var(--shadow-ios); transition: transform 0.2s, background-color 0.2s; 
-            cursor: pointer; position: relative; border: 1px solid rgba(0,0,0,0.03);
-        }
+        .product-card { background: var(--card-bg); border-radius: var(--radius-card); padding: 22px; margin-bottom: 20px; box-shadow: var(--shadow-ios); transition: transform 0.2s, background-color 0.2s; cursor: pointer; position: relative; border: 1px solid rgba(0,0,0,0.03); }
         .product-card:active { transform: scale(0.97); background-color: #f9f9f9; }
         .product-title { font-family: var(--font-brand); font-size: 1.5rem; color: var(--primary-blue); margin-bottom: 8px; font-weight: 800; letter-spacing: 0.5px; }
         .product-desc { font-size: 1rem; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.4; }
         .price-tag { font-weight: 700; color: var(--primary-blue); font-size: 1.1rem; display: inline-block; background: #f0f4f8; padding: 8px 16px; border-radius: 20px; }
-        a.card-link { text-decoration: none; color: inherit; display: block; }
 
-        /* BOTON PREVIEW */
-        .btn-preview {
-            display: flex; align-items: center; justify-content: center; width: 100%;
-            background-color: #fff; color: var(--primary-blue); border: 2px dashed var(--primary-blue);
-            padding: 15px; border-radius: var(--radius-card); margin-bottom: 20px;
-            text-decoration: none; font-weight: 700; font-size: 1.05rem; transition: all 0.2s;
-            box-shadow: 0 2px 10px rgba(26, 59, 92, 0.05);
-        }
-        .btn-preview:hover { background-color: #f0f4f8; transform: scale(0.98); }
-
-        /* FOOTER ADMIN */
-        .admin-footer {
-            text-align: center; padding: 20px; color: #a1a1a6; font-size: 0.8rem; margin-top: 20px;
-        }
+        .admin-footer { text-align: center; padding: 20px; color: #a1a1a6; font-size: 0.8rem; margin-top: 20px; }
         .admin-footer span { cursor: pointer; text-decoration: none; transition: color 0.3s; }
         .admin-footer span:hover { color: var(--primary-blue); }
 
-        /* MODALES */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); z-index: 200; justify-content: center; align-items: flex-end; }
         .modal-overlay.active { display: flex; }
         .modal-content { background: #ffffff; width: 100%; max-width: 600px; border-top-left-radius: 30px; border-top-right-radius: 30px; padding: 25px; padding-top: 15px; max-height: 92vh; overflow-y: auto; animation: slideUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; position: relative; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
         .modal-grabber { width: 40px; height: 5px; background-color: #e5e5ea; border-radius: 10px; margin: 0 auto 20px auto; flex-shrink: 0;}
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-title-text { margin: 0; color:var(--primary-blue); font-family:var(--font-brand); font-size: 1.8rem; }
         .close-modal-btn { background: #f0f0f0; border: none; width: 36px; height: 36px; border-radius: 50%; color: #888; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold;}
 
-        /* FORMULARIOS */
         .section-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-blue); margin: 25px 0 12px 0; }
-        
-        select, input[type="text"], input[type="tel"], input[type="password"], input[type="number"] { 
-            width: 100%; padding: 14px 16px; border: 1px solid #e5e5ea; border-radius: var(--radius-input); 
-            font-size: 1.05rem; background-color: #fff; appearance: none; -webkit-appearance: none; 
-            color: var(--text-main); outline: none; font-family: var(--font-main);
-        }
+        select, input[type="text"], input[type="tel"], input[type="password"], input[type="number"] { width: 100%; padding: 14px 16px; border: 1px solid #e5e5ea; border-radius: var(--radius-input); font-size: 1.05rem; background-color: #fff; appearance: none; -webkit-appearance: none; color: var(--text-main); outline: none; font-family: var(--font-main); }
         select:focus, input:focus { border-color: var(--primary-blue); }
-        
         select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231A3B5C%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-13%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2013l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.7-9.2-5.4-13z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto; padding-right: 40px; }
         .select-wrapper { position: relative; }
 
-
-        /* GALERÍA DE TAPAS */
         .cover-helper { margin: -2px 0 12px; color: var(--text-secondary); font-size: 0.92rem; line-height: 1.35; }
         .cover-gallery-status { margin: 10px 0 14px; padding: 12px 14px; border-radius: 12px; background: #f2f2f7; color: var(--text-secondary); font-size: 0.9rem; }
         .cover-gallery-status.error { background: #fff4f3; color: var(--danger-red); }
@@ -125,8 +84,6 @@
         .empty-options-note { padding: 14px; border-radius: 12px; background: #f2f2f7; color: var(--text-secondary); font-size: 0.92rem; line-height: 1.4; }
         @media (min-width: 520px) { .cover-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
-
-        /* PROMO REMERA SIN RECREO */
         .shirt-promo-card { margin-top: 8px; padding: 18px; border-radius: 18px; background: linear-gradient(145deg, #1a1a1b, #303033); color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,0.16); }
         .shirt-promo-kicker { display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 999px; background: #b35c44; color: #fff; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
         .shirt-promo-title { margin: 12px 0 5px; font-family: var(--font-brand); font-size: 1.55rem; line-height: 1.05; }
@@ -158,7 +115,6 @@
         .shirt-label { display: block; padding: 9px 8px 10px; text-align: center; font-size: 0.79rem; font-weight: 800; line-height: 1.2; }
         @media (min-width: 520px) { .shirt-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
-        /* LIBRERÍA DOCENTE */
         .stationery-intro { margin: -2px 0 14px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4; }
         .stationery-list { display: flex; flex-direction: column; gap: 12px; }
         .stationery-card { border: 1px solid #e5e5ea; border-radius: 16px; background: #fff; overflow: hidden; transition: border-color 0.18s ease, box-shadow 0.18s ease; }
@@ -180,7 +136,6 @@
         .kit-base-option input[type="radio"] { width: 18px; height: 18px; margin: 0; accent-color: var(--primary-blue); flex-shrink: 0; }
         .stationery-note { margin-top: 12px; padding: 11px 12px; border-radius: 12px; background: #eef6fc; color: var(--primary-blue); font-size: 0.82rem; line-height: 1.4; }
 
-        /* CHECKBOXES */
         .checkbox-list { display: flex; flex-direction: column; border-radius: var(--radius-input); overflow: hidden; border: 1px solid #e5e5ea; }
         .checkbox-item-wrapper { display: flex; flex-direction: column; background: #fff; border-bottom: 1px solid #e5e5ea; }
         .checkbox-item-wrapper:last-child { border-bottom: none; }
@@ -191,7 +146,6 @@
         input[type="checkbox"]:checked { background-color: var(--primary-blue); border-color: var(--primary-blue); }
         input[type="checkbox"]:checked::after { content: '✓'; font-size: 14px; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; }
 
-        /* DELIVERY RADIO BUTTONS */
         .delivery-options { display: flex; flex-direction: column; gap: 10px; margin-top: 5px; }
         .radio-item { display: flex; align-items: center; background: white; padding: 14px; border: 1px solid #e5e5ea; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
         .radio-item:active { background-color: #f2f2f7; transform: scale(0.99); }
@@ -200,53 +154,44 @@
         .radio-title { font-weight: 600; font-size: 1rem; color: var(--text-main); margin-bottom: 2px; }
         .radio-desc { font-size: 0.85rem; color: var(--text-secondary); }
 
-        /* QTY INPUT */
         .qty-input-wrapper { display: none; padding: 12px 16px; background: #f2f2f7; border-top: 1px solid #e5e5ea; align-items: center; justify-content: space-between; animation: fadeIn 0.3s; }
         .qty-input-wrapper.show { display: flex; }
         .qty-input { width: 80px; padding: 10px; border-radius: 8px; border: 1px solid #c6c6c8; text-align: center; font-size: 1.1rem; font-weight: 600; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* VALIDATION & TOTAL */
         #validation-msg { color: var(--danger-red); font-size: 0.95rem; text-align: center; margin-bottom: 10px; font-weight: 600; min-height: 20px; display: flex; align-items: center; justify-content: center; gap: 5px;}
         .current-price { font-size: 2.2rem; font-weight: 800; color: var(--text-main); text-align: center; margin: 10px 0 25px 0; letter-spacing: -1px; }
         .btn-add { width: 100%; background-color: var(--primary-blue); color: white; padding: 18px; border: none; border-radius: 16px; font-size: 1.2rem; font-weight: 700; cursor: pointer; opacity: 1; transition: all 0.3s; font-family: var(--font-main); }
         .btn-add:disabled { background-color: #e5e5ea; color: #999; cursor: not-allowed; }
 
-        /* BARRA FLOTANTE */
         .cart-float { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 88%; max-width: 500px; background: rgba(26, 59, 92, 0.95); backdrop-filter: blur(20px); padding: 12px 20px; border-radius: 100px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); display: flex; justify-content: space-between; align-items: center; z-index: 150; transition: bottom 0.4s; cursor: pointer; }
         .cart-float.hidden { bottom: -150px; }
         .cart-total { font-weight: 800; color: white; font-size: 1.2rem; display: block; }
         .cart-count { font-size: 0.9rem; color: rgba(255,255,255,0.8); display: block;}
         .btn-view-cart { background-color: white; color: var(--primary-blue); padding: 10px 22px; border-radius: 20px; font-weight: 800; font-size: 0.95rem; border: none; }
 
-        /* CARRITO & COUPON */
         .cart-item { background: #fff; border-radius: 18px; padding: 18px; margin-bottom: 15px; position: relative; border: 1px solid #e5e5ea; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
         .cart-item-title { font-weight: 800; color: var(--primary-blue); margin-bottom: 8px; font-size: 1.1rem; }
         .cart-item-details { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.5; }
         .cart-item-price { font-weight: 800; font-size: 1.1rem; text-align: right; color: var(--text-main); }
         .btn-remove { position: absolute; top: 15px; right: 15px; background: #f2f2f7; border-radius: 50%; width: 30px; height: 30px; border: none; color: var(--text-secondary); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        
-        /* Coupon Field */
+
         .coupon-section { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed #c6c6c8; }
         .coupon-input-group { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-apply-coupon { background: var(--text-main); color: white; border: none; padding: 0 20px; border-radius: 12px; font-weight: 600; cursor: pointer; }
         #coupon-msg { font-size: 0.85rem; margin-top: 5px; min-height: 18px; }
         .success-text { color: var(--accent-green); font-weight: 600; }
         .error-text { color: var(--danger-red); font-weight: 600; }
 
         .btn-whatsapp { width: 100%; background-color: #25D366; color: white; padding: 18px; border-radius: 16px; text-decoration: none; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 1.2rem; margin-top: 0; border: none; cursor: pointer; font-family: var(--font-main); }
 
-        /* DATA INPUTS CART */
         .cart-data-input { margin-bottom: 12px; }
         .cart-data-label { display: block; font-weight: 600; color: var(--primary-blue); margin-bottom: 5px; font-size: 0.95rem; }
         .small-note { font-size: 0.85rem; color: var(--text-secondary); font-weight: 400; }
 
-        /* ADMIN PANEL */
         .admin-list { list-style: none; padding: 0; margin: 0; }
         .admin-list li { background: #f2f2f7; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .admin-code { font-family: monospace; font-weight: bold; color: var(--primary-blue); font-size: 1.1rem; }
         .admin-discount { font-weight: 800; color: var(--accent-green); }
-
     </style>
 </head>
 <body>
@@ -267,7 +212,7 @@
             <div class="product-desc">Gestioná múltiples cursos, elegí tu portada y sumá agregados para tu agenda.</div>
             <span class="price-tag">Personalizar ➔</span>
         </div>
-<div class="admin-footer">
+        <div class="admin-footer">
             <span onclick="openAdminLogin()">2026 Docentes Brown | Acceso Admin</span>
         </div>
     </div>
@@ -297,21 +242,17 @@
                 <h2 class="modal-title-text">Tu Pedido</h2>
                 <button class="close-modal-btn" onclick="closeCartModal()">✕</button>
             </div>
-            
             <div id="cart-items-container" style="flex-grow: 1; overflow-y: auto; margin-bottom: 20px; padding-bottom: 10px;"></div>
 
             <div style="margin-bottom: 25px; border-top: 1px solid #e5e5ea; padding-top: 20px;" id="personal-data-section">
                 <h3 style="font-size: 1.1rem; color: var(--primary-blue); margin-bottom: 15px;">Tus Datos</h3>
-                
                 <div class="cart-data-input">
                     <input type="text" id="client-name" placeholder="Nombre Completo *" autocomplete="name" oninput="invalidateCheckoutOrder()">
                 </div>
-
                 <div class="cart-data-input">
                     <input type="tel" id="client-phone" placeholder="Número de celular *" autocomplete="tel" inputmode="tel" oninput="invalidateCheckoutOrder()">
                     <div style="margin-top:4px; font-size:0.8rem; color:var(--text-secondary); margin-left:5px;">Lo usamos para identificar y coordinar tu pedido.</div>
                 </div>
-
                 <div class="cart-data-input" style="margin-top: 20px;">
                     <label class="cart-data-label">Método de entrega *</label>
                     <div class="delivery-options">
@@ -331,7 +272,6 @@
                         </label>
                     </div>
                 </div>
-
                 <div id="data-error-msg" style="color: var(--danger-red); font-weight:600; font-size: 0.9rem; margin-top: 15px; display: none;">⚠️ Ingresá tu nombre completo, un número de celular válido y elegí el método de entrega.</div>
             </div>
 
@@ -391,16 +331,13 @@
                 <h2 class="modal-title-text">Gestión Admin</h2>
                 <button class="close-modal-btn" onclick="closeAdminDashboard()">✕</button>
             </div>
-            
             <div style="margin-bottom: 30px;">
                 <h3 class="section-title">Códigos Promocionales (Desde Excel)</h3>
                 <p style="font-size:0.9rem; color:#888; margin-bottom:15px;">
                     Gestioná los códigos promocionales en tu Google Sheet:<br>Columna G: <b>CÓDIGO</b> | Columna H: <b>% de descuento</b><br><span class="small-note">Para DOSPAGOS, podés dejar 0 en la columna H.</span>
                 </p>
-                <ul class="admin-list" id="active-coupons-list">
-                    </ul>
+                <ul class="admin-list" id="active-coupons-list"></ul>
             </div>
-            
             <button class="btn-whatsapp" style="background:#8e8e93; margin-top:10px;" onclick="window.open('https://docs.google.com/spreadsheets/d/e/2PACX-1vTXegIgxvYuUiHgQBgJIvIexndD6QYUi-UKz0lGem04RYDLkOo3OmdXNME1e63A3g/pub?gid=885679872&single=true&output=csv', '_blank')">Ver Archivo Fuente</button>
         </div>
     </div>
@@ -417,22 +354,10 @@
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXegIgxvYuUiHgQBgJIvIexndD6QYUi-UKz0lGem04RYDLkOo3OmdXNME1e63A3g/pub?gid=885679872&single=true&output=csv";
         const WA_NUMBER = "5491135585647";
         const ADMIN_PASS = "Brown2025";
-        
-        // TAPAS: se obtienen exclusivamente de la carpeta de Google Drive.
-        // No se leen desde la hoja de cálculo ni desde una lista fija dentro del HTML.
         const COVER_FOLDER_ID = "18h2v0vtZxagwB9WV_eyidSHO9uvh6zDr";
         const COVER_FOLDER_URL = `https://drive.google.com/drive/folders/${COVER_FOLDER_ID}`;
-
-        // Pegá aquí la misma URL /exec del Web App de Google Apps Script que ya usabas
-        // para leer la carpeta de tapas.
         const COVERS_API_URL = "https://script.google.com/macros/s/AKfycbzjZS1BWh0XBanQGWgGD4EJGbI4MqQwBbeUV60F68p7-2VNd2558gzCec-Vxgwd5saq/exec";
-
-        // El mismo Web App registra cada pedido en la base de Google Sheets “Pedidos”.
-        // Al actualizar Code.gs, hay que publicar una nueva versión de la implementación.
         const PEDIDOS_API_URL = COVERS_API_URL;
-
-        // REMERAS SIN RECREO: los modelos se obtienen desde la carpeta de Drive.
-        // El cliente elige el modelo en la app; talle y color se coordinan luego por WhatsApp.
         const SHIRT_FOLDER_ID = "1mjLOqhA80otwFtAXS3HOeMHwOSYE0fn5";
         const SHIRTS_API_URL = `${COVERS_API_URL}?type=shirts`;
         const SHIRT_PROMO_PRICE = 20000;
@@ -486,17 +411,13 @@
         async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-            try {
-                return await fetch(url, { ...options, signal: controller.signal });
-            } finally {
-                clearTimeout(timeoutId);
-            }
+            try { return await fetch(url, { ...options, signal: controller.signal }); }
+            finally { clearTimeout(timeoutId); }
         }
 
         function invalidateCheckoutOrder() {
             currentCheckoutOrderId = '';
             orderSubmissionLocked = false;
-
             const button = document.getElementById('btn-confirm-order');
             if (button) {
                 button.disabled = false;
@@ -506,7 +427,6 @@
 
         function getCheckoutOrderId() {
             if (currentCheckoutOrderId) return currentCheckoutOrderId;
-
             const now = new Date();
             const stamp = [
                 now.getFullYear(),
@@ -521,23 +441,14 @@
             return currentCheckoutOrderId;
         }
 
-        function normalizePhone(value) {
-            return String(value || '').replace(/[^0-9]/g, '');
-        }
+        function normalizePhone(value) { return String(value || '').replace(/[^0-9]/g, ''); }
 
         function queueOrderSave(payload) {
             const encoded = new URLSearchParams({ payload: JSON.stringify(payload) });
-
             try {
-                if (navigator.sendBeacon && navigator.sendBeacon(PEDIDOS_API_URL, encoded)) {
-                    return true;
-                }
-            } catch (error) {
-                console.warn('sendBeacon no pudo enviar el pedido:', error);
-            }
+                if (navigator.sendBeacon && navigator.sendBeacon(PEDIDOS_API_URL, encoded)) return true;
+            } catch (error) { console.warn('sendBeacon no pudo enviar el pedido:', error); }
 
-            // Respaldo compatible con páginas alojadas en dominios distintos a Apps Script.
-            // El formulario se envía a un iframe oculto para evitar bloqueos CORS.
             try {
                 const frameName = `pedido-frame-${Date.now()}`;
                 const iframe = document.createElement('iframe');
@@ -559,10 +470,7 @@
                 document.body.appendChild(form);
                 form.submit();
 
-                setTimeout(() => {
-                    form.remove();
-                    iframe.remove();
-                }, 15000);
+                setTimeout(() => { form.remove(); iframe.remove(); }, 15000);
                 return true;
             } catch (error) {
                 console.error('No se pudo enviar el pedido a la base:', error);
@@ -573,8 +481,6 @@
         async function startPage() {
             if (pageStarted) return;
             pageStarted = true;
-
-            // La interfaz nunca queda bloqueada esperando Drive o Google Sheets.
             setTimeout(hideLoadingScreen, PAGE_LOADER_MAX_MS);
 
             try {
@@ -583,18 +489,9 @@
                     loadCoverCatalog(),
                     loadShirtCatalog()
                 ]);
-
-                if (catalogResult.status === 'rejected') {
-                    console.error('Error al cargar cursos y agregados:', catalogResult.reason);
-                }
-
-                if (coversResult.status === 'rejected') {
-                    console.error('Error al cargar tapas:', coversResult.reason);
-                }
-
-                if (shirtsResult.status === 'rejected') {
-                    console.error('Error al cargar remeras:', shirtsResult.reason);
-                }
+                if (catalogResult.status === 'rejected') console.error('Error al cargar cursos y agregados:', catalogResult.reason);
+                if (coversResult.status === 'rejected') console.error('Error al cargar tapas:', coversResult.reason);
+                if (shirtsResult.status === 'rejected') console.error('Error al cargar remeras:', shirtsResult.reason);
             } catch (error) {
                 console.error('Error general de inicio:', error);
             } finally {
@@ -602,11 +499,8 @@
             }
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', startPage, { once: true });
-        } else {
-            startPage();
-        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startPage, { once: true });
+        else startPage();
 
         async function loadSpreadsheetCatalog() {
             const res = await fetchWithTimeout(CSV_URL, { cache: 'no-store' });
@@ -623,33 +517,22 @@
             const rows = csv.split('\n').slice(1);
             rows.forEach(row => {
                 const cols = row.split(',').map(c => c.trim());
-                // Columnas A y B: cantidad de cursos y precio del calificador.
                 if(cols[0]) CATALOG.profesores.push({ name: cols[0], price: parseInt(cols[1]) || 0 });
-
-                // Columnas E y F: agregados para la agenda y sus precios.
                 if(cols[4]) CATALOG.agregados.push({ name: cols[4], price: parseInt(cols[5]) || 0 });
-                
-                // Columnas G y H: código promocional y porcentaje de descuento.
-                // DOSPAGOS es un plan de pago, no un descuento: 50% ahora y 50% en la entrega.
                 if(cols[6]) {
                     const code = cols[6].trim().toUpperCase();
                     const rawPercent = (cols[7] || '').trim();
                     const percent = code === 'DOSPAGOS' ? 0 : parseFloat(rawPercent);
-                    if(code && (code === 'DOSPAGOS' || !isNaN(percent))) {
-                        CATALOG.cupones.push({ code: code, discount: percent });
-                    }
+                    if(code && (code === 'DOSPAGOS' || !isNaN(percent))) CATALOG.cupones.push({ code, discount: percent });
                 }
             });
         }
 
-
         function populateCouponSelect() {
             const select = document.getElementById('coupon-code-input');
             if (!select) return;
-
             const currentValue = select.value;
             select.innerHTML = '<option value="">Sin código promocional</option>';
-
             const uniqueCoupons = [];
             const seenCodes = new Set();
             CATALOG.cupones.forEach(coupon => {
@@ -657,7 +540,6 @@
                 seenCodes.add(coupon.code);
                 uniqueCoupons.push(coupon);
             });
-
             uniqueCoupons.forEach(coupon => {
                 const option = document.createElement('option');
                 option.value = coupon.code;
@@ -666,33 +548,19 @@
                     : `${coupon.code} — ${coupon.discount}% de descuento`;
                 select.appendChild(option);
             });
-
-            if (currentValue && seenCodes.has(currentValue)) {
-                select.value = currentValue;
-            }
+            if (currentValue && seenCodes.has(currentValue)) select.value = currentValue;
         }
 
         async function loadCoverCatalog() {
             coverCatalog = [];
             coverCatalogError = '';
-
-            if (!COVERS_API_URL || COVERS_API_URL.includes('PEGAR_AQUI')) {
-                coverCatalogError = 'La página abrió correctamente, pero falta configurar la URL /exec del Web App que lee la carpeta de Google Drive. Las tapas no se toman de la hoja.';
-                return;
-            }
-
             try {
                 const response = await fetchWithTimeout(COVERS_API_URL, { cache: 'no-store' });
                 if (!response.ok) throw new Error(`Respuesta ${response.status}`);
-
                 const payload = await response.json();
-                if (payload && payload.ok === false) {
-                    throw new Error(payload.error || 'El Web App informó un error.');
-                }
-
+                if (payload && payload.ok === false) throw new Error(payload.error || 'El Web App informó un error.');
                 const items = Array.isArray(payload) ? payload : payload.items;
                 if (!Array.isArray(items)) throw new Error('El Web App no devolvió una lista válida.');
-
                 coverCatalog = items
                     .filter(item => item && item.name && (item.image || item.thumbnail))
                     .map((item, index) => ({
@@ -701,10 +569,7 @@
                         image: String(item.image || item.thumbnail || '').trim()
                     }))
                     .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
-
-                if (coverCatalog.length === 0) {
-                    throw new Error('La carpeta no contiene imágenes compatibles.');
-                }
+                if (coverCatalog.length === 0) throw new Error('La carpeta no contiene imágenes compatibles.');
             } catch (error) {
                 console.error('Error al cargar tapas desde Drive:', error);
                 coverCatalog = [];
@@ -715,22 +580,12 @@
         async function loadShirtCatalog() {
             shirtCatalog = [];
             shirtCatalogError = '';
-
             try {
                 const response = await fetchWithTimeout(SHIRTS_API_URL, { cache: 'no-store' });
                 if (!response.ok) throw new Error(`Respuesta ${response.status}`);
-
                 const payload = await response.json();
-                if (payload && payload.ok === false) {
-                    throw new Error(payload.error || 'El Web App informó un error.');
-                }
-
-                // Esta validación evita mostrar por error las tapas cuando el Apps Script todavía
-                // no fue actualizado para admitir la carpeta de remeras.
-                if (!payload || payload.type !== 'shirts') {
-                    throw new Error('El Web App debe actualizarse para leer la carpeta de remeras.');
-                }
-
+                if (payload && payload.ok === false) throw new Error(payload.error || 'El Web App informó un error.');
+                if (!payload || payload.type !== 'shirts') throw new Error('El Web App debe actualizarse para leer la carpeta de remeras.');
                 const items = Array.isArray(payload.items) ? payload.items : [];
                 shirtCatalog = items
                     .filter(item => item && item.name && (item.image || item.thumbnail))
@@ -740,10 +595,7 @@
                         image: String(item.image || item.thumbnail || '').trim()
                     }))
                     .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
-
-                if (shirtCatalog.length === 0) {
-                    throw new Error('La carpeta no contiene imágenes compatibles.');
-                }
+                if (shirtCatalog.length === 0) throw new Error('La carpeta no contiene imágenes compatibles.');
             } catch (error) {
                 console.error('Error al cargar remeras desde Drive:', error);
                 shirtCatalog = [];
@@ -767,19 +619,14 @@
             if (!gallery || !status) return;
 
             selectedCoverId = '';
-            if (summary) {
-                summary.classList.remove('show');
-                summary.textContent = '';
-            }
+            if (summary) { summary.classList.remove('show'); summary.textContent = ''; }
 
             status.textContent = coverCatalogError;
             status.classList.toggle('error', Boolean(coverCatalogError));
 
             if (coverCatalog.length === 0) {
                 gallery.innerHTML = '';
-                if (!status.textContent) {
-                    status.textContent = 'No hay tapas disponibles por el momento.';
-                }
+                if (!status.textContent) status.textContent = 'No hay tapas disponibles por el momento.';
                 status.classList.add('error');
                 return;
             }
@@ -802,7 +649,6 @@
         function selectCover(button) {
             document.querySelectorAll('.cover-option').forEach(option => option.classList.remove('selected'));
             button.classList.add('selected');
-
             selectedCoverId = button.dataset.coverId || '';
             const selectedName = button.dataset.coverName || '';
             const input = document.getElementById('input-tema');
@@ -819,10 +665,7 @@
             if (addonsSection) addonsSection.classList.add('show');
 
             updateTotal();
-
-            if (wasHidden) {
-                setTimeout(() => addonsSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
-            }
+            if (wasHidden) setTimeout(() => addonsSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
         }
 
         function renderShirtGallery() {
@@ -875,16 +718,12 @@
 
             const stationerySection = document.getElementById('stationery-section');
             if (stationerySection) stationerySection.classList.add('show');
-
             updateTotal();
         }
 
         function handleAgendaSelectionProgress() {
             const shirtSection = document.getElementById('shirt-promo-section');
             const hasAgendaChoice = document.querySelectorAll('#group-agenda input:checked').length > 0;
-
-            // Habilita la sección siguiente, pero mantiene al cliente en los agregados
-            // para que pueda seleccionar varios antes de avanzar manualmente.
             if (shirtSection) shirtSection.classList.toggle('show', hasAgendaChoice);
             updateTotal();
         }
@@ -901,13 +740,9 @@
             }
 
             if (summary && selected) {
-                if (selected.value === 'yes') {
-                    summary.textContent = selectedShirtName
-                        ? `Remera elegida: ${selectedShirtName}. Talle y color se coordinan por WhatsApp.`
-                        : 'Elegí un modelo de la galería.';
-                } else {
-                    summary.textContent = 'No se agregará una remera al pedido.';
-                }
+                summary.textContent = selected.value === 'yes'
+                    ? (selectedShirtName ? `Remera elegida: ${selectedShirtName}. Talle y color se coordinan por WhatsApp.` : 'Elegí un modelo de la galería.')
+                    : 'No se agregará una remera al pedido.';
                 summary.classList.add('show');
             }
             if (stationerySection) stationerySection.classList.toggle('show', Boolean(selected));
@@ -923,23 +758,19 @@
             if (coverSection) coverSection.classList.toggle('show', shouldShow);
             updateTotal();
 
-            if (shouldShow && wasHidden) {
-                setTimeout(() => coverSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
-            }
+            if (shouldShow && wasHidden) setTimeout(() => coverSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
         }
 
         function openAdminLogin() { document.getElementById('admin-login-modal').classList.add('active'); }
         function closeAdminLogin() { document.getElementById('admin-login-modal').classList.remove('active'); }
-        
+
         function checkAdminPassword() {
             const input = document.getElementById('admin-password').value;
             if(input === ADMIN_PASS) {
                 closeAdminLogin();
                 openAdminDashboard();
                 document.getElementById('admin-password').value = '';
-            } else {
-                alert("Contraseña incorrecta");
-            }
+            } else alert("Contraseña incorrecta");
         }
 
         function openAdminDashboard() {
@@ -964,15 +795,18 @@
             document.getElementById('config-modal').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
+
         function closeConfigModal() { 
             document.getElementById('config-modal').classList.remove('active');
             document.body.style.overflow = '';
         }
+
         function openCartModal() { 
             renderCartItems(); 
             document.getElementById('cart-modal-view').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
+
         function closeCartModal() { 
             document.getElementById('cart-modal-view').classList.remove('active');
             document.body.style.overflow = '';
@@ -1059,7 +893,7 @@
                 const kitOptions = Array.isArray(item.kitBaseOptions)
                     ? `<div class="kit-base-choice">
                             <span class="kit-base-title">Elegí la variante del kit:</span>
-                            ${item.kitBaseOptions.map((option, optionIndex) => `
+                            ${item.kitBaseOptions.map((option) => `
                                 <label class="kit-base-option">
                                     <input type="radio" name="kitStationeryBase" value="${escapeHtml(option)}" onchange="updateTotal()">
                                     <span>${escapeHtml(option)}</span>
@@ -1148,12 +982,14 @@
                 });
             }
         }
+
         function handleRegularItem(group, checkbox) {
             if(checkbox.checked) {
                 const ningunoBox = document.getElementById(`${group}-0`);
                 if(ningunoBox && (ningunoBox.dataset.name === "Ninguno" || ningunoBox.dataset.name === "No agregar")) ningunoBox.checked = false;
             }
         }
+
         function toggleQty(id) {
             const checkbox = document.getElementById(id);
             const wrapper = document.getElementById(`qty-wrapper-${id}`);
@@ -1163,7 +999,7 @@
         function updateTotal() {
             let total = 0;
             let errors = [];
-            
+
             const baseSelect = document.getElementById('input-base');
             if (baseSelect) {
                 total += parseInt(baseSelect.options[baseSelect.selectedIndex]?.dataset.price || 0);
@@ -1296,9 +1132,7 @@
             updateCartBar();
         }
 
-        function calculateDiscountAmount(subtotal, percent) {
-            return Math.round(subtotal * percent / 100);
-        }
+        function calculateDiscountAmount(subtotal, percent) { return Math.round(subtotal * percent / 100); }
 
         function calculateTwoPayments(total) {
             const payNow = Math.ceil(total / 2);
@@ -1334,13 +1168,10 @@
                 ? calculateDiscountAmount(discountableSubtotal, appliedDiscount.percent)
                 : 0;
             const finalTotal = subtotal - discountAmount;
-
             return { subtotal, discountableSubtotal, nonDiscountableSubtotal, shirtSubtotal, stationerySubtotal, discountAmount, finalTotal };
         }
 
-        function getCartFinalTotal() {
-            return Math.floor(getCartBreakdown().finalTotal);
-        }
+        function getCartFinalTotal() { return Math.floor(getCartBreakdown().finalTotal); }
 
         function renderCartItems() {
             const container = document.getElementById('cart-items-container');
@@ -1424,14 +1255,9 @@
             }
 
             const found = CATALOG.cupones.find(c => c.code === code);
-            
             if(found) {
                 const isTwoPayments = found.code === 'DOSPAGOS';
-                appliedDiscount = {
-                    code: found.code,
-                    percent: isTwoPayments ? 0 : found.discount,
-                    isTwoPayments
-                };
+                appliedDiscount = { code: found.code, percent: isTwoPayments ? 0 : found.discount, isTwoPayments };
                 msg.innerText = isTwoPayments
                     ? 'Código DOSPAGOS aplicado: abonás 50% ahora y el 50% restante al momento de la entrega.'
                     : `¡Código ${found.code} aplicado! Tenés ${found.discount}% de descuento sobre la agenda y sus agregados. La remera y la librería quedan fuera de la promoción.`;
@@ -1499,12 +1325,8 @@
                 text += `Subtotal: $${breakdown.subtotal.toLocaleString('es-AR')}\n`;
                 text += `Código promocional: *${appliedDiscount.code}*\n`;
                 text += `Base con descuento (agenda y agregados): $${breakdown.discountableSubtotal.toLocaleString('es-AR')}\n`;
-                if (breakdown.shirtSubtotal > 0) {
-                    text += `Remera sin descuento: $${breakdown.shirtSubtotal.toLocaleString('es-AR')}\n`;
-                }
-                if (breakdown.stationerySubtotal > 0) {
-                    text += `Librería sin descuento: $${breakdown.stationerySubtotal.toLocaleString('es-AR')}\n`;
-                }
+                if (breakdown.shirtSubtotal > 0) text += `Remera sin descuento: $${breakdown.shirtSubtotal.toLocaleString('es-AR')}\n`;
+                if (breakdown.stationerySubtotal > 0) text += `Librería sin descuento: $${breakdown.stationerySubtotal.toLocaleString('es-AR')}\n`;
                 text += `Descuento (${appliedDiscount.percent}%): -$${breakdown.discountAmount.toLocaleString('es-AR')}\n`;
                 text += `*TOTAL FINAL: $${breakdown.finalTotal.toLocaleString('es-AR')}*`;
             } else {
@@ -1525,15 +1347,8 @@
                 orderId,
                 createdAtClient: new Date().toISOString(),
                 sourceUrl: window.location.href,
-                customer: {
-                    fullName: clientName,
-                    phone: clientPhoneRaw,
-                    phoneDigits: clientPhoneDigits
-                },
-                delivery: {
-                    code: deliveryCode,
-                    label: deliveryText
-                },
+                customer: { fullName: clientName, phone: clientPhoneRaw, phoneDigits: clientPhoneDigits },
+                delivery: { code: deliveryCode, label: deliveryText },
                 coupon: {
                     code: appliedDiscount.code || '',
                     percent: Number(appliedDiscount.percent || 0),
@@ -1591,6 +1406,323 @@
             if (event.target == document.getElementById('admin-login-modal')) closeAdminLogin();
             if (event.target == document.getElementById('admin-dashboard-modal')) closeAdminDashboard();
         }
+    </script>
+
+    <!-- Modal promocional Calificador 2027 integrado -->
+    <script>
+    (() => {
+      'use strict';
+
+      const CAMPAIGN_DATE = { year: 2026, month: 8, day: 31 };
+      const TIME_ZONE = 'America/Argentina/Buenos_Aires';
+      const MODAL_ID = 'db-calificador-2027-modal';
+
+      function getBuenosAiresDateParts() {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: TIME_ZONE,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        });
+
+        const parts = formatter.formatToParts(new Date());
+        const map = {};
+        parts.forEach(part => {
+          if (part.type !== 'literal') map[part.type] = Number(part.value);
+        });
+
+        return { year: map.year, month: map.month, day: map.day };
+      }
+
+      function isCampaignDay() {
+        const today = getBuenosAiresDateParts();
+        return today.year === CAMPAIGN_DATE.year &&
+               today.month === CAMPAIGN_DATE.month &&
+               today.day === CAMPAIGN_DATE.day;
+      }
+
+      function closePromoModal() {
+        const modal = document.getElementById(MODAL_ID);
+        if (!modal) return;
+        modal.classList.remove('db-promo-visible');
+        document.body.classList.remove('db-promo-lock');
+        setTimeout(() => modal.remove(), 260);
+      }
+
+      function goToCalificador2027() {
+        closePromoModal();
+
+        if (typeof openConfigModal === 'function') {
+          setTimeout(() => openConfigModal('profesores'), 280);
+          return;
+        }
+
+        const productCard =
+          document.querySelector('[onclick*="openConfigModal(\'profesores\')"]') ||
+          document.querySelector('[onclick*="openConfigModal(&quot;profesores&quot;)"]');
+
+        if (productCard) {
+          setTimeout(() => productCard.click(), 280);
+          return;
+        }
+
+        try {
+          if (typeof WA_NUMBER !== 'undefined' && WA_NUMBER) {
+            const msg = encodeURIComponent(
+              'Hola Docentes Brown. Quiero encargar mi Calificador 2027 hoy 31 de agosto y pagarlo antes del 10 de septiembre manteniendo el precio de agosto.'
+            );
+            window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank', 'noopener');
+          }
+        } catch (_) {}
+      }
+
+      function buildModal() {
+        if (!isCampaignDay()) return;
+        if (document.getElementById(MODAL_ID)) return;
+
+        const style = document.createElement('style');
+        style.id = 'db-calificador-2027-style';
+        style.textContent = `
+          .db-promo-lock { overflow: hidden !important; }
+
+          #${MODAL_ID} {
+            --db-blue: var(--primary-blue, #24496e);
+            --db-cream: var(--bg-brand, #f3efdc);
+            --db-coral: #da6863;
+            --db-ink: #18212a;
+            --db-white: #ffffff;
+            --db-shadow: 0 24px 70px rgba(24, 33, 42, .30);
+            position: fixed;
+            inset: 0;
+            z-index: 100000;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+            background: rgba(10, 20, 30, .58);
+            backdrop-filter: blur(9px);
+            -webkit-backdrop-filter: blur(9px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .22s ease;
+          }
+
+          #${MODAL_ID}.db-promo-visible {
+            opacity: 1;
+            pointer-events: auto;
+          }
+
+          #${MODAL_ID} .db-promo-card {
+            width: min(100%, 500px);
+            position: relative;
+            overflow: hidden;
+            border-radius: 28px;
+            background: var(--db-cream);
+            border: 1px solid rgba(255,255,255,.5);
+            box-shadow: var(--db-shadow);
+            transform: translateY(18px) scale(.98);
+            transition: transform .28s cubic-bezier(.2,.8,.2,1);
+          }
+
+          #${MODAL_ID}.db-promo-visible .db-promo-card {
+            transform: translateY(0) scale(1);
+          }
+
+          #${MODAL_ID} .db-promo-top {
+            position: relative;
+            padding: 24px 26px 72px;
+            background: var(--db-blue);
+            color: var(--db-white);
+          }
+
+          #${MODAL_ID} .db-promo-top::after {
+            content: '';
+            position: absolute;
+            left: -8%;
+            right: -8%;
+            bottom: -36px;
+            height: 74px;
+            background: var(--db-cream);
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+          }
+
+          #${MODAL_ID} .db-promo-brand {
+            font-family: 'League Spartan', sans-serif;
+            font-weight: 800;
+            font-size: .86rem;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            opacity: .9;
+          }
+
+          #${MODAL_ID} .db-promo-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: var(--db-coral);
+            color: white;
+            font-family: 'League Spartan', sans-serif;
+            font-size: .82rem;
+            font-weight: 800;
+            letter-spacing: .04em;
+          }
+
+          #${MODAL_ID} h2 {
+            margin: 16px 0 0;
+            max-width: 390px;
+            color: white;
+            font-family: 'League Spartan', sans-serif;
+            font-size: clamp(2rem, 8vw, 3rem);
+            line-height: .98;
+            letter-spacing: -.025em;
+            text-transform: uppercase;
+          }
+
+          #${MODAL_ID} .db-promo-body {
+            padding: 25px 26px 26px;
+            color: var(--db-ink);
+          }
+
+          #${MODAL_ID} .db-promo-lead {
+            margin: 0;
+            font-size: 1.08rem;
+            line-height: 1.42;
+          }
+
+          #${MODAL_ID} .db-promo-highlight {
+            margin: 18px 0;
+            padding: 16px 17px;
+            border-radius: 18px;
+            background: white;
+            border-left: 5px solid var(--db-coral);
+            box-shadow: 0 8px 24px rgba(36,73,110,.08);
+            font-size: .98rem;
+            line-height: 1.45;
+          }
+
+          #${MODAL_ID} .db-promo-highlight strong { color: var(--db-blue); }
+
+          #${MODAL_ID} .db-promo-cta {
+            width: 100%;
+            border: 0;
+            border-radius: 16px;
+            padding: 17px 18px;
+            background: var(--db-blue);
+            color: white;
+            cursor: pointer;
+            font-family: 'League Spartan', sans-serif;
+            font-size: 1.08rem;
+            font-weight: 800;
+            letter-spacing: .015em;
+            box-shadow: 0 8px 22px rgba(36,73,110,.20);
+          }
+
+          #${MODAL_ID} .db-promo-cta:active { transform: scale(.985); }
+
+          #${MODAL_ID} .db-promo-note {
+            margin: 11px 0 0;
+            color: #66717a;
+            font-size: .82rem;
+            line-height: 1.35;
+            text-align: center;
+          }
+
+          #${MODAL_ID} .db-promo-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 3;
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,.14);
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+          }
+
+          @media (max-width: 480px) {
+            #${MODAL_ID} { align-items: end; padding: 10px; }
+            #${MODAL_ID} .db-promo-card { border-radius: 26px 26px 18px 18px; }
+            #${MODAL_ID} .db-promo-top { padding: 22px 22px 64px; }
+            #${MODAL_ID} .db-promo-body { padding: 23px 22px 22px; }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            #${MODAL_ID},
+            #${MODAL_ID} .db-promo-card { transition: none; }
+          }
+        `;
+        document.head.appendChild(style);
+
+        const modal = document.createElement('div');
+        modal.id = MODAL_ID;
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'db-promo-title');
+
+        modal.innerHTML = `
+          <section class="db-promo-card">
+            <button class="db-promo-close" type="button" aria-label="Cerrar promoción">×</button>
+            <div class="db-promo-top">
+              <div class="db-promo-brand">Docentes Brown</div>
+              <div class="db-promo-kicker">HOY • 31 DE AGOSTO</div>
+              <h2 id="db-promo-title">Congelá hoy el precio de tu Calificador 2027</h2>
+            </div>
+            <div class="db-promo-body">
+              <p class="db-promo-lead">
+                <strong>Encargá hoy tu Calificador 2027</strong> y asegurate el
+                <strong>precio de agosto</strong>.
+              </p>
+
+              <div class="db-promo-highlight">
+                Lo reservás <strong>hoy, 31 de agosto</strong> y tenés tiempo para
+                <strong>pagarlo hasta el 10 de septiembre</strong>.
+              </div>
+
+              <button class="db-promo-cta" type="button">
+                QUIERO ENCARGAR MI CALIFICADOR 2027
+              </button>
+
+              <p class="db-promo-note">
+                Beneficio válido únicamente para encargos realizados durante el 31/08/2026.
+              </p>
+            </div>
+          </section>
+        `;
+
+        document.body.appendChild(modal);
+        document.body.classList.add('db-promo-lock');
+
+        modal.querySelector('.db-promo-close').addEventListener('click', closePromoModal);
+        modal.querySelector('.db-promo-cta').addEventListener('click', goToCalificador2027);
+
+        modal.addEventListener('click', (event) => {
+          if (event.target === modal) closePromoModal();
+        });
+
+        document.addEventListener('keydown', function escHandler(event) {
+          if (event.key === 'Escape' && document.getElementById(MODAL_ID)) {
+            closePromoModal();
+            document.removeEventListener('keydown', escHandler);
+          }
+        });
+
+        requestAnimationFrame(() => modal.classList.add('db-promo-visible'));
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', buildModal);
+      } else {
+        buildModal();
+      }
+    })();
     </script>
 </body>
 </html>
